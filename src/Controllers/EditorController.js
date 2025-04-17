@@ -66,7 +66,7 @@ class EditorController extends CanvasController{
 
     defineCellTypeSelection() {
         var self = this;
-        $('.cell-type').click( function() {
+        $('.cell-type').click(function() {
             switch(this.id){
                 case "carnivoreMouth":
                     self.edit_cell_type = CellStates.carnivoreMouth;
@@ -79,6 +79,15 @@ class EditorController extends CanvasController{
                     break;
                 case "mover":
                     self.edit_cell_type = CellStates.mover;
+                    break;
+                case "leftRightMover":
+                    self.edit_cell_type = CellStates.leftRightMover;
+                    break;
+                case "upDownMover":
+                    self.edit_cell_type = CellStates.upDownMover;
+                    break;
+                case "rotationMover":
+                    self.edit_cell_type = CellStates.rotationMover;
                     break;
                 case "killer":
                     self.edit_cell_type = CellStates.killer;
@@ -93,7 +102,7 @@ class EditorController extends CanvasController{
                     self.edit_cell_type = CellStates.storage;
                     break;
             }
-            $(".cell-type" ).css( "border-color", "black" );
+            $(".cell-type" ).css("border-color", "black");
             var selected = '#'+this.id+'.cell-type';
             $(selected).css("border-color", "yellow");
         });
@@ -112,18 +121,18 @@ class EditorController extends CanvasController{
             FossilRecord.changeSpeciesName(this.env.organism.species, new_name);
         }.bind(this));
 
-        $('#move-range-edit').change ( function() {
+        $('#move-range-edit').change(function() {
             this.env.organism.move_range = parseInt($('#move-range-edit').val());
         }.bind(this));
 		
-        $('#mutation-rate-edit').change ( function() {
+        $('#mutation-rate-edit').change(function() {
             this.env.organism.mutability = parseInt($('#mutation-rate-edit').val());
         }.bind(this));
-        $('#observation-type-edit').change ( function() {
+        $('#observation-type-edit').change(function() {
             this.setBrainEditorValues($('#observation-type-edit').val());
             this.setBrainDetails();
         }.bind(this));
-        $('#reaction-edit').change ( function() {
+        $('#reaction-edit').change(function() {
             var obs = $('#observation-type-edit').val();
             var decision = parseInt($('#reaction-edit').val());
             this.env.organism.brain.decisions[obs] = decision;
@@ -172,7 +181,6 @@ class EditorController extends CanvasController{
             this.setEditorPanel();
         else
             this.setDetailsPanel();
-
     }
 
     setDetailsPanel() {
@@ -194,8 +202,9 @@ class EditorController extends CanvasController{
 
         if (this.setBrainPanelVisibility()) {
             this.setBrainDetails();
-
         }
+
+        $('#cell-selections').css('display', 'none');
         $('#organism-details').css('display', 'block');
     }
 
@@ -221,7 +230,12 @@ class EditorController extends CanvasController{
             this.setBrainEditorValues($('#observation-type-edit').val());
         }
 
-        $('#cell-selections').css('display', 'grid');
+        if (this.mode === Modes.Edit) {
+            $('#cell-selections').css('display', 'grid');
+        } else {
+            $('#cell-selections').css('display', 'none');
+        }
+        
         $('#edit-organism-details').css('display', 'block');
     }
 

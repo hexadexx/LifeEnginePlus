@@ -301,7 +301,7 @@ class Organism {
                 return this.living;
         }
         
-        if (this.anatomy.is_mover) {
+        if (this.anatomy.is_mover || this.anatomy.is_ud_mover || this.anatomy.is_lr_mover) {
             this.move_count++;
             var changed_dir = false;
             
@@ -313,33 +313,39 @@ class Organism {
             
             var moved = false;
             
-            if (this.anatomy.is_ud_mover && this.anatomy.is_lr_mover) {
+            if (this.anatomy.is_mover) {
+                moved = this.attemptMove();
+            } else if (this.anatomy.is_ud_mover && this.anatomy.is_lr_mover) {
                 moved = this.attemptMove();
             } else if (this.anatomy.is_ud_mover) {
-                moved = this.attemptMove(
-                    this.direction === Directions.up || this.direction === Directions.down
-                );
+                if (this.direction === Directions.up || this.direction === Directions.down) {
+                    moved = this.attemptMove();
+                } else {
+                    this.changeDirection(Math.random() < 0.5 ? Directions.up : Directions.down);
+                    moved = this.attemptMove();
+                }
             } else if (this.anatomy.is_lr_mover) {
-                moved = this.attemptMove(
-                    this.direction === Directions.left || this.direction === Directions.right
-                );
-            } else {
-                moved = this.attemptMove();
+                if (this.direction === Directions.left || this.direction === Directions.right) {
+                    moved = this.attemptMove();
+                } else {
+                    this.changeDirection(Math.random() < 0.5 ? Directions.left : Directions.right);
+                    moved = this.attemptMove();
+                }
             }
             
             if ((this.move_count > this.move_range && !changed_dir) || !moved) {
                 var rotated = false;
                 
-                if (this.anatomy.is_rotation_mover) {
+                if (this.anatomy.is_rotation_mover || this.anatomy.is_mover) {
                     rotated = this.attemptRotate();
                 }
                 
                 if (!rotated) {
                     let newDirection;
                     
-                    if (this.anatomy.is_ud_mover && !this.anatomy.is_lr_mover) {
+                    if (this.anatomy.is_ud_mover && !this.anatomy.is_lr_mover && !this.anatomy.is_mover) {
                         newDirection = this.direction === Directions.up ? Directions.down : Directions.up;
-                    } else if (this.anatomy.is_lr_mover && !this.anatomy.is_ud_mover) {
+                    } else if (this.anatomy.is_lr_mover && !this.anatomy.is_ud_mover && !this.anatomy.is_mover) {
                         newDirection = this.direction === Directions.left ? Directions.right : Directions.left;
                     } else {
                         newDirection = Directions.getRandomDirection();

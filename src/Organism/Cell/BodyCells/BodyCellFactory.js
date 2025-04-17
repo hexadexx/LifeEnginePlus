@@ -1,4 +1,3 @@
-
 const CarnivoreMouthCell = require("./CarnivoreMouthCell");
 const HerbivoreMouthCell = require("./HerbivoreMouthCell");
 const ProducerCell = require("./ProducerCell");
@@ -30,18 +29,30 @@ const BodyCellFactory = {
     },
 
     createInherited: function(org, to_copy) {
+        if (!this.type_map[to_copy.state.name]) {
+            console.error("Unknown cell type:", to_copy.state.name);
+            return null;
+        }
         var cell = new this.type_map[to_copy.state.name](org, to_copy.loc_col, to_copy.loc_row);
         cell.initInherit(to_copy);
         return cell;
     },
 
     createRandom: function(org, state, loc_col, loc_row) {
+        if (!this.type_map[state.name]) {
+            console.error("Unknown cell type:", state.name);
+            return null;
+        }
         var cell = new this.type_map[state.name](org, loc_col, loc_row);
         cell.initRandom();
         return cell;
     },
 
     createDefault: function(org, state, loc_col, loc_row) {
+        if (!this.type_map[state.name]) {
+            console.error("Unknown cell type:", state.name);
+            return null;
+        }
         var cell = new this.type_map[state.name](org, loc_col, loc_row);
         cell.initDefault();
         return cell;

@@ -30,8 +30,12 @@ class Anatomy {
 
     addDefaultCell(state, c, r) {
         var new_cell = BodyCellFactory.createDefault(this.owner, state, c, r);
-        this.cells.push(new_cell);
-        return new_cell;
+        if (new_cell) {
+            this.cells.push(new_cell);
+            this.checkTypeChange();
+            return new_cell;
+        }
+        return null;
     }
 
     addRandomizedCell(state, c, r) {
@@ -39,14 +43,22 @@ class Anatomy {
             this.owner.brain.randomizeDecisions();
         }
         var new_cell = BodyCellFactory.createRandom(this.owner, state, c, r);
-        this.cells.push(new_cell);
-        return new_cell;
+        if (new_cell) {
+            this.cells.push(new_cell);
+            this.checkTypeChange();
+            return new_cell;
+        }
+        return null;
     }
 
     addInheritCell(parent_cell) {
         var new_cell = BodyCellFactory.createInherited(this.owner, parent_cell);
-        this.cells.push(new_cell);
-        return new_cell;
+        if (new_cell) {
+            this.cells.push(new_cell);
+            this.checkTypeChange();
+            return new_cell;
+        }
+        return null;
     }
 
     replaceCell(state, c, r, randomize=true) {
@@ -83,10 +95,10 @@ class Anatomy {
     }
 
     checkTypeChange() {
+        this.is_mover = false;
         this.is_ud_mover = false;
         this.is_lr_mover = false;
         this.is_rotation_mover = false;
-
         this.is_producer = false;
         this.has_eyes = false;
 
@@ -96,9 +108,7 @@ class Anatomy {
                     this.is_producer = true;
                     break;
                 case 'mover':
-                    this.is_ud_mover = true;
-                    this.is_lr_mover = true;
-                    this.is_rotation_mover = true;
+                    this.is_mover = true;
                     break;
                 case 'leftRightMover':
                     this.is_lr_mover = true;
@@ -135,7 +145,7 @@ class Anatomy {
         return neighbors;
     }
 
-    isEqual(anatomy) { // currently unused helper func. inefficient, avoid usage in prod.
+    isEqual(anatomy) {
         if (this.cells.length !== anatomy.cells.length) return false;
         for (let i in this.cells) {
             let my_cell = this.cells[i];

@@ -23,7 +23,7 @@ class Food extends CellState {
         ctx.fillStyle = this.color;
         ctx.fillRect(cell.x, cell.y, size, size);
         
-        if(size == 1) return;
+        if(size <= 1) return;
         
         const innerSize = size / 2;
         const offset = (size - innerSize) / 2;
@@ -40,7 +40,7 @@ class Plant extends CellState {
         ctx.fillStyle = this.color;
         ctx.fillRect(cell.x, cell.y, size, size);
         
-        if(size == 1) return;
+        if(size <= 1) return;
         
         const innerSize = size / 2;
         const offset = (size - innerSize) / 2;
@@ -57,7 +57,7 @@ class Meat extends CellState {
         ctx.fillStyle = this.color;
         ctx.fillRect(cell.x, cell.y, size, size);
         
-        if(size == 1) return;
+        if(size <= 1) return;
         
         const innerSize = size / 2;
         const offset = (size - innerSize) / 2;
@@ -77,18 +77,17 @@ class CarnivoreMount extends CellState {
     render(ctx, cell, size) {
         ctx.fillStyle = this.color;
         ctx.fillRect(cell.x, cell.y, size, size);
-        if(size == 1) return;
+        if(size <= 1) return;
         
         ctx.fillStyle = "#8B0000"; 
-        const slitWidth = 3;
+        const slitWidth = Math.max(1, Math.floor(size * 0.1));
+        const halfSize = size / 2;
+        const slitOffset = Math.max(0, halfSize - (slitWidth / 2));
         
-        ctx.fillRect(cell.x + (size / 2) - (slitWidth / 2), cell.y, slitWidth, slitWidth);
-        
-        ctx.fillRect(cell.x + (size / 2) - (slitWidth / 2), cell.y + size - slitWidth, slitWidth, slitWidth);
-        
-        ctx.fillRect(cell.x, cell.y + (size / 2) - (slitWidth / 2), slitWidth, slitWidth);
-        
-        ctx.fillRect(cell.x + size - slitWidth, cell.y + (size / 2) - (slitWidth / 2), slitWidth, slitWidth);
+        ctx.fillRect(cell.x + slitOffset, cell.y, slitWidth, slitWidth);
+        ctx.fillRect(cell.x + slitOffset, cell.y + size - slitWidth, slitWidth, slitWidth);
+        ctx.fillRect(cell.x, cell.y + slitOffset, slitWidth, slitWidth);
+        ctx.fillRect(cell.x + size - slitWidth, cell.y + slitOffset, slitWidth, slitWidth);
     }
 }
 class HerbivoreMouth extends CellState {
@@ -98,18 +97,17 @@ class HerbivoreMouth extends CellState {
     render(ctx, cell, size) {
         ctx.fillStyle = this.color;
         ctx.fillRect(cell.x, cell.y, size, size);
-        if(size == 1) return;
+        if(size <= 1) return;
         
         ctx.fillStyle = "#006400"; 
-        const slitWidth = 3;
+        const slitWidth = Math.max(1, Math.floor(size * 0.1));
+        const halfSize = size / 2;
+        const slitOffset = Math.max(0, halfSize - (slitWidth / 2));
         
-        ctx.fillRect(cell.x + (size / 2) - (slitWidth / 2), cell.y, slitWidth, slitWidth);
-        
-        ctx.fillRect(cell.x + (size / 2) - (slitWidth / 2), cell.y + size - slitWidth, slitWidth, slitWidth);
-        
-        ctx.fillRect(cell.x, cell.y + (size / 2) - (slitWidth / 2), slitWidth, slitWidth);
-        
-        ctx.fillRect(cell.x + size - slitWidth, cell.y + (size / 2) - (slitWidth / 2), slitWidth, slitWidth);
+        ctx.fillRect(cell.x + slitOffset, cell.y, slitWidth, slitWidth);
+        ctx.fillRect(cell.x + slitOffset, cell.y + size - slitWidth, slitWidth, slitWidth);
+        ctx.fillRect(cell.x, cell.y + slitOffset, slitWidth, slitWidth);
+        ctx.fillRect(cell.x + size - slitWidth, cell.y + slitOffset, slitWidth, slitWidth);
     }
 }
 class Producer extends CellState {
@@ -140,7 +138,7 @@ class Storage extends CellState {
         ctx.fillStyle = this.color;
         ctx.fillRect(cell.x, cell.y, size, size);
         
-        if(size == 1 || !cell.cell_owner || !cell.cell_owner.storedFood) return;
+        if(size <= 1 || !cell.cell_owner || !cell.cell_owner.storedFood) return;
         
         let innerColor;
         switch(cell.cell_owner.storedFood) {
@@ -171,18 +169,21 @@ class Eye extends CellState {
     render(ctx, cell, size) {
         ctx.fillStyle = this.color;
         ctx.fillRect(cell.x, cell.y, size, size);
-        if(size == 1)
-            return;
-        var half = size/2;
-        var x = -(size)/8
-        var y = -half;
-        var h = size/2 + size/4;
-        var w = size/4;
+        if(size <= 1) return;
+        
+        const halfSize = size / 2;
+        const slitWidth = Math.max(1, Math.floor(size * 0.25));
+        const slitHeight = Math.max(1, Math.floor(size * 0.75));
+        const xOffset = -(Math.floor(size) / 8);
+        const yOffset = -halfSize;
+        
         ctx.save();
-        ctx.translate(cell.x+half, cell.y+half);
-        ctx.rotate((cell.cell_owner.getAbsoluteDirection() * 90) * Math.PI / 180);
+        ctx.translate(cell.x + halfSize, cell.y + halfSize);
+        if (cell.cell_owner && typeof cell.cell_owner.getAbsoluteDirection === 'function') {
+            ctx.rotate((cell.cell_owner.getAbsoluteDirection() * 90) * Math.PI / 180);
+        }
         ctx.fillStyle = this.slit_color;
-        ctx.fillRect(x, y, w, h);
+        ctx.fillRect(xOffset, yOffset, slitWidth, slitHeight);
         ctx.restore();
     }
 }
@@ -193,14 +194,15 @@ class LeftRightMover extends CellState {
     render(ctx, cell, size) {
         ctx.fillStyle = this.color;
         ctx.fillRect(cell.x, cell.y, size, size);
-        if(size == 1) return;
+        if(size <= 1) return;
         
         ctx.fillStyle = "#305A80"; 
-        const slitWidth = 3;
+        const slitWidth = Math.max(1, Math.floor(size * 0.1));
+        const halfSize = size / 2;
+        const slitOffset = Math.max(0, halfSize - (slitWidth / 2));
         
-        ctx.fillRect(cell.x, cell.y + (size / 2) - (slitWidth / 2), slitWidth, slitWidth);
-        
-        ctx.fillRect(cell.x + size - slitWidth, cell.y + (size / 2) - (slitWidth / 2), slitWidth, slitWidth);
+        ctx.fillRect(cell.x, cell.y + slitOffset, slitWidth, slitWidth);
+        ctx.fillRect(cell.x + size - slitWidth, cell.y + slitOffset, slitWidth, slitWidth);
     }
 }
 class UpDownMover extends CellState {
@@ -210,14 +212,15 @@ class UpDownMover extends CellState {
     render(ctx, cell, size) {
         ctx.fillStyle = this.color;
         ctx.fillRect(cell.x, cell.y, size, size);
-        if(size == 1) return;
+        if(size <= 1) return;
         
         ctx.fillStyle = "#305A80"; 
-        const slitWidth = 3;
+        const slitWidth = Math.max(1, Math.floor(size * 0.1));
+        const halfSize = size / 2;
+        const slitOffset = Math.max(0, halfSize - (slitWidth / 2));
         
-        ctx.fillRect(cell.x + (size / 2) - (slitWidth / 2), cell.y, slitWidth, slitWidth);
-        
-        ctx.fillRect(cell.x + (size / 2) - (slitWidth / 2), cell.y + size - slitWidth, slitWidth, slitWidth);
+        ctx.fillRect(cell.x + slitOffset, cell.y, slitWidth, slitWidth);
+        ctx.fillRect(cell.x + slitOffset, cell.y + size - slitWidth, slitWidth, slitWidth);
     }
 }
 class RotationMover extends CellState {
@@ -227,17 +230,14 @@ class RotationMover extends CellState {
     render(ctx, cell, size) {
         ctx.fillStyle = this.color;
         ctx.fillRect(cell.x, cell.y, size, size);
-        if(size == 1) return;
+        if(size <= 1) return;
         
         ctx.fillStyle = "#305A80"; 
-        const slitWidth = 3;
+        const slitWidth = Math.max(1, Math.floor(size * 0.1));
         
         ctx.fillRect(cell.x, cell.y, slitWidth, slitWidth);
-        
         ctx.fillRect(cell.x + size - slitWidth, cell.y, slitWidth, slitWidth);
-        
         ctx.fillRect(cell.x, cell.y + size - slitWidth, slitWidth, slitWidth);
-        
         ctx.fillRect(cell.x + size - slitWidth, cell.y + size - slitWidth, slitWidth, slitWidth);
     }
 }
