@@ -52,6 +52,10 @@ class Anatomy {
     }
 
     addInheritCell(parent_cell) {
+        if (parent_cell.state && parent_cell.state.name === "mouth") {
+            parent_cell = {...parent_cell, state: CellStates.carnivoreMouth};
+        }
+        
         var new_cell = BodyCellFactory.createInherited(this.owner, parent_cell);
         if (new_cell) {
             this.cells.push(new_cell);
@@ -125,7 +129,6 @@ class Anatomy {
             }
         }
     }
-
 
     getRandomCell() {
         return this.cells[Math.floor(Math.random() * this.cells.length)];

@@ -106,6 +106,11 @@ class EditorController extends CanvasController{
             var selected = '#'+this.id+'.cell-type';
             $(selected).css("border-color", "yellow");
         });
+
+        $('#clear-editor').click(() => {
+            this.env.setDefaultOrg();
+            this.setEditorPanel();
+        });
     }
 
     defineEditorDetails() {
@@ -157,9 +162,63 @@ class EditorController extends CanvasController{
         });
     }
 
+    convertMouthCells(organism) {
+        let cells = {};
+        let mouthCells = [];
+        
+        if (!organism || !organism.anatomy || !organism.anatomy.cells) {
+            return false;
+        }
+        
+        for (let cell of organism.anatomy.cells) {
+            if (!cell || !cell.state) continue;
+            
+            const key = `${cell.loc_col},${cell.loc_row}`;
+            cells[key] = cell;
+            
+            if (cell.state.name === "mouth") {
+                mouthCells.push(cell);
+            }
+        }
+        
+        for (let mouthCell of mouthCells) {
+            let hasAdjacentProducer = false;
+            
+            for (let dx = -1; dx <= 1; dx++) {
+                for (let dy = -1; dy <= 1; dy++) {
+                    if (dx === 0 && dy === 0) continue;
+                    
+                    const neighborKey = `${mouthCell.loc_col + dx},${mouthCell.loc_row + dy}`;
+                    const neighbor = cells[neighborKey];
+                    
+                    if (neighbor && neighbor.state && neighbor.state.name === "producer") {
+                        hasAdjacentProducer = true;
+                        break;
+                    }
+                }
+                if (hasAdjacentProducer) break;
+            }
+            
+            try {
+                if (hasAdjacentProducer) {
+                    organism.anatomy.replaceCell(CellStates.herbivoreMouth, mouthCell.loc_col, mouthCell.loc_row, false);
+                } else {
+                    organism.anatomy.replaceCell(CellStates.carnivoreMouth, mouthCell.loc_col, mouthCell.loc_row, false);
+                }
+            } catch (error) {
+                console.error(`Failed to convert mouth cell at (${mouthCell.loc_col},${mouthCell.loc_row})`, error);
+            }
+        }
+        
+        return mouthCells.length > 0;
+    }
+
     loadOrg(org) {
         this.env.clear();
         this.env.organism.loadRaw(org);
+        
+        this.convertMouthCells(this.env.organism);
+        
         this.refreshDetailsPanel();
         this.env.organism.updateGrid();
         this.env.renderFull();
