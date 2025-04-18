@@ -259,16 +259,13 @@ class Organism {
             }
         }
         
+        const lifespan = this.lifespan();
+        
         for (var cell of this.anatomy.cells) {
             var real_c = this.c + cell.rotatedCol(this.rotation);
             var real_r = this.r + cell.rotatedRow(this.rotation);
             
-            const meatCell = this.env.changeCell(real_c, real_r, CellStates.meat, null);
-
-            if (meatCell && meatCell.cell_owner) {
-                meatCell.cell_owner.rotTimer = Math.floor(this.lifespan() * 2.15);
-                meatCell.cell_owner.initialRotTimer = meatCell.cell_owner.rotTimer;
-            }
+            this.env.changeCell(real_c, real_r, CellStates.meat, null);
         }
         
         this.species.decreasePop();
