@@ -52,10 +52,6 @@ class Anatomy {
     }
 
     addInheritCell(parent_cell) {
-        if (parent_cell.state && parent_cell.state.name === "mouth") {
-            parent_cell = {...parent_cell, state: CellStates.carnivoreMouth};
-        }
-        
         var new_cell = BodyCellFactory.createInherited(this.owner, parent_cell);
         if (new_cell) {
             this.cells.push(new_cell);
@@ -130,6 +126,38 @@ class Anatomy {
         }
     }
 
+    loadRaw(anatomy) {
+        this.clear();
+        
+        const mouthCells = [];
+        for (let cell of anatomy.cells) {
+            if (cell.state.name !== 'mouth') {
+                this.addInheritCell(cell);
+            } else {
+                mouthCells.push(cell);
+            }
+        }
+
+        for (let mouthCell of mouthCells) {
+            const hasProducerNearby = this.cells.some(existingCell => {
+                return existingCell.state.name === 'producer' && 
+                       (Math.abs(existingCell.loc_col - mouthCell.loc_col) <= 1) && 
+                       (Math.abs(existingCell.loc_row - mouthCell.loc_row) <= 1);
+            });
+
+            const newMouthState = hasProducerNearby ? CellStates.herbivoreMouth : CellStates.carnivoreMouth;
+            
+            const newMouthCell = BodyCellFactory.createInherited(this.owner, {
+                ...mouthCell,
+                state: { name: newMouthState.name }
+            });
+
+            this.cells.push(newMouthCell);
+        }
+        
+        this.checkTypeChange();
+    }
+
     getRandomCell() {
         return this.cells[Math.floor(Math.random() * this.cells.length)];
     }
@@ -170,13 +198,6 @@ class Anatomy {
             anatomy.cells.push(newcell)
         }
         return anatomy;
-    }
-
-    loadRaw(anatomy) {
-        this.clear();
-        for (let cell of anatomy.cells){
-            this.addInheritCell(cell);
-        }
     }
 }
 

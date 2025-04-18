@@ -6,6 +6,7 @@ class StorageCell extends BodyCell {
     constructor(org, loc_col, loc_row) {
         super(CellStates.storage, org, loc_col, loc_row);
         this.storedFood = null;
+        this.lastEjectRotTime = 0;
     }
 
     performFunction() {
@@ -29,6 +30,7 @@ class StorageCell extends BodyCell {
             } 
             else if (cell.state === CellStates.meat) {
                 this.storedFood = "meat";
+                this.lastEjectRotTime = cell.rotTime || 0;
                 env.changeCell(cell.col, cell.row, CellStates.empty, null);
                 env.renderer.addToRender(this.getRealCell());
                 return;
@@ -45,18 +47,19 @@ class StorageCell extends BodyCell {
     retrieveFood(foodType) {
         if (this.storedFood === null) return false;
         
-        if (foodType !== "any" && foodType !== "food" && this.storedFood !== foodType) {
-            return false;
+        if (foodType === "any" || this.storedFood === foodType) {
+            const retrieved = this.storedFood;
+            this.storedFood = null;
+            return retrieved;
         }
         
-        const retrieved = this.storedFood;
-        this.storedFood = null;
-        return retrieved;
+        return false;
     }
 
     initInherit(parent) {
         super.initInherit(parent);
         this.storedFood = parent.storedFood;
+        this.lastEjectRotTime = parent.lastEjectRotTime || 0;
     }
     
     releaseStoredFood() {
@@ -72,7 +75,10 @@ class StorageCell extends BodyCell {
                 let foodState;
                 switch(this.storedFood) {
                     case "food": foodState = CellStates.food; break;
-                    case "meat": foodState = CellStates.meat; break;
+                    case "meat": 
+                        foodState = CellStates.meat;
+                        cell.rotTime = this.lastEjectRotTime;
+                        break;
                     case "plant": foodState = CellStates.plant; break;
                     default: return false;
                 }

@@ -63,6 +63,28 @@ class Meat extends CellState {
         const offset = (size - innerSize) / 2;
         ctx.fillStyle = "#C95050"; 
         ctx.fillRect(cell.x + offset, cell.y + offset, innerSize, innerSize);
+
+        if (cell.cell_owner && cell.cell_owner.rotTimer !== undefined) {
+            ctx.fillStyle = "white";
+            ctx.font = "8px Arial";
+            ctx.fillText(cell.cell_owner.rotTimer, cell.x + 2, cell.y + size - 2);
+        }
+    }
+}
+class Rot extends CellState {
+    constructor() {
+        super('rot');
+    }
+    render(ctx, cell, size) {
+        ctx.fillStyle = this.color;
+        ctx.fillRect(cell.x, cell.y, size, size);
+        
+        if(size <= 1) return;
+        
+        const innerSize = size / 2;
+        const offset = (size - innerSize) / 2;
+        ctx.fillStyle = "#806060"; 
+        ctx.fillRect(cell.x + offset, cell.y + offset, innerSize, innerSize);
     }
 }
 class Wall extends CellState {
@@ -330,6 +352,7 @@ class RotationMover extends CellState {
 
 const CellStates = {
     empty: new Empty(),
+    rot: new Rot(),
     food: new Food(),
     plant: new Plant(),
     meat: new Meat(),

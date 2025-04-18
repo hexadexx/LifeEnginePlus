@@ -2,9 +2,9 @@ const CellStates = require("../CellStates");
 const BodyCell = require("./BodyCell");
 const Hyperparams = require("../../../Hyperparameters");
 
-class HerbivoreMouthCell extends BodyCell {
+class OmnivoreMouthCell extends BodyCell {
     constructor(org, loc_col, loc_row) {
-        super(CellStates.herbivoreMouth, org, loc_col, loc_row);
+        super(CellStates.omnivoreMouth, org, loc_col, loc_row);
         this.lastEatenCell = null;
     }
 
@@ -30,7 +30,7 @@ class HerbivoreMouthCell extends BodyCell {
     eatNeighbor(n_cell, env) {
         if (n_cell == null) return false;
         
-        if ((n_cell.state === CellStates.plant || n_cell.state === CellStates.food) && 
+        if ((n_cell.state === CellStates.plant || n_cell.state === CellStates.meat || n_cell.state === CellStates.food) && 
             n_cell !== this.lastEatenCell) {
             env.changeCell(n_cell.col, n_cell.row, CellStates.empty, null);
             this.org.food_collected++;
@@ -47,8 +47,8 @@ class HerbivoreMouthCell extends BodyCell {
         for (var loc of Hyperparams.edibleNeighbors) {
             var cell = env.grid_map.cellAt(real_c + loc[0], real_r + loc[1]);
             if (cell && cell.cell_owner && cell.cell_owner.state === CellStates.storage) {
-                const foodType = cell.cell_owner.retrieveFood("plant");
-                if (foodType === "plant" || foodType === "food") {
+                const foodType = cell.cell_owner.retrieveFood("any");
+                if (foodType === "plant" || foodType === "meat" || foodType === "food") {
                     this.org.food_collected++;
                     env.renderer.addToRender(cell); 
                     return;
@@ -58,4 +58,4 @@ class HerbivoreMouthCell extends BodyCell {
     }
 }
 
-module.exports = HerbivoreMouthCell;
+module.exports = OmnivoreMouthCell;

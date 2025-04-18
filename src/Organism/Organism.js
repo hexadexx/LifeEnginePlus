@@ -16,8 +16,8 @@ class Organism {
         this.food_collected = 0;
         this.living = true;
         this.anatomy = new Anatomy(this)
-        this.direction = Directions.down; // direction of movement
-        this.rotation = Directions.up; // direction of rotation
+        this.direction = Directions.down;
+        this.rotation = Directions.up;
         this.can_rotate = Hyperparams.rotationEnabled;
         this.move_count = 0;
         this.move_range = 4;
@@ -35,7 +35,6 @@ class Organism {
         this.mutability = parent.mutability;
         this.species = parent.species;
         for (var c of parent.anatomy.cells){
-            //deep copy parent cells
             this.anatomy.addInheritCell(c);
         }
         if(parent.anatomy.is_mover && parent.anatomy.has_eyes) {
@@ -43,7 +42,6 @@ class Organism {
         }
     }
 
-    // amount of food required before it can reproduce
     foodNeeded() {
         return this.anatomy.is_mover ? this.anatomy.cells.length + Hyperparams.extraMoverFoodCost : this.anatomy.cells.length;
     }
@@ -57,8 +55,6 @@ class Organism {
     }
 
     reproduce() {
-        //produce mutated child
-        //check nearby locations (is there room and a direct path)
         var org = new Organism(0, 0, this.env, this);
         if(Hyperparams.rotationEnabled){
             org.rotation = Directions.getRandomDirection();
@@ -68,7 +64,6 @@ class Organism {
             prob = Hyperparams.globalMutability;
         }
         else {
-            //mutate the mutability
             if (Math.random() <= 0.5)
                 org.mutability++;
             else{ 
@@ -126,7 +121,7 @@ class Organism {
         let removed = false;
         if (this.calcRandomChance(Hyperparams.addProb)) {
             let branch = this.anatomy.getRandomCell();
-            let state = CellStates.getRandomLivingType();//branch.state;
+            let state = CellStates.getRandomLivingType();
             let growth_direction = Neighbors.all[Math.floor(Math.random() * Neighbors.all.length)]
             let c = branch.loc_col+growth_direction[0];
             let r = branch.loc_row+growth_direction[1];
@@ -201,7 +196,6 @@ class Organism {
         this.move_count = 0;
     }
 
-    // assumes either c1==c2 or r1==r2, returns true if there is a clear path from point 1 to 2
     isStraightPath(c1, r1, c2, r2, parent){
         if (c1 == c2) {
             if (r1 > r2){
@@ -259,19 +253,24 @@ class Organism {
     }
 
     die() {
-        // try to release any stored food from storage
         for (var cell of this.anatomy.cells) {
             if (cell.state === CellStates.storage) {
                 cell.releaseStoredFood();
             }
         }
         
-        // then actually die
         for (var cell of this.anatomy.cells) {
             var real_c = this.c + cell.rotatedCol(this.rotation);
             var real_r = this.r + cell.rotatedRow(this.rotation);
-            this.env.changeCell(real_c, real_r, CellStates.meat, null);
+            
+            const meatCell = this.env.changeCell(real_c, real_r, CellStates.meat, null);
+
+            if (meatCell && meatCell.cell_owner) {
+                meatCell.cell_owner.rotTimer = Math.floor(this.lifespan() * 2.15);
+                meatCell.cell_owner.initialRotTimer = meatCell.cell_owner.rotTimer;
+            }
         }
+        
         this.species.decreasePop();
         this.living = false;
     }
@@ -301,9 +300,7 @@ class Organism {
                 return this.living;
         }
         
-        const canMove = this.anatomy.is_mover || this.anatomy.is_ud_mover || this.anatomy.is_lr_mover || this.anatomy.is_rotation_mover;
-        
-        if (canMove) {
+        if (this.anatomy.is_mover || this.anatomy.is_ud_mover || this.anatomy.is_lr_mover) {
             this.move_count++;
             var changed_dir = false;
             
@@ -317,19 +314,16 @@ class Organism {
             
             if (this.anatomy.is_mover) {
                 moved = this.attemptMove();
-            } 
-            else if (this.anatomy.is_ud_mover && this.anatomy.is_lr_mover) {
+            } else if (this.anatomy.is_ud_mover && this.anatomy.is_lr_mover) {
                 moved = this.attemptMove();
-            } 
-            else if (this.anatomy.is_ud_mover) {
+            } else if (this.anatomy.is_ud_mover) {
                 if (this.direction === Directions.up || this.direction === Directions.down) {
                     moved = this.attemptMove();
                 } else {
                     this.changeDirection(Math.random() < 0.5 ? Directions.up : Directions.down);
                     moved = this.attemptMove();
                 }
-            } 
-            else if (this.anatomy.is_lr_mover) {
+            } else if (this.anatomy.is_lr_mover) {
                 if (this.direction === Directions.left || this.direction === Directions.right) {
                     moved = this.attemptMove();
                 } else {
@@ -366,7 +360,6 @@ class Organism {
         
         return this.living;
     }
-
 
     getRealCell(local_cell, c=this.c, r=this.r, rotation=this.rotation){
         var real_c = c + local_cell.rotatedCol(rotation);
