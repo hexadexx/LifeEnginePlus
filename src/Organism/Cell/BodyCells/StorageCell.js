@@ -24,19 +24,19 @@ class StorageCell extends BodyCell {
             if (cell.state === CellStates.food) {
                 this.storedFood = "food";
                 env.changeCell(cell.col, cell.row, CellStates.empty, null);
-                env.renderer.addToRender(this.getRealCell()); // Force render update
+                env.renderer.addToRender(this.getRealCell());
                 return;
             } 
             else if (cell.state === CellStates.meat) {
                 this.storedFood = "meat";
                 env.changeCell(cell.col, cell.row, CellStates.empty, null);
-                env.renderer.addToRender(this.getRealCell()); // Force render update
+                env.renderer.addToRender(this.getRealCell());
                 return;
             }
             else if (cell.state === CellStates.plant) {
                 this.storedFood = "plant";
                 env.changeCell(cell.col, cell.row, CellStates.empty, null);
-                env.renderer.addToRender(this.getRealCell()); // Force render update
+                env.renderer.addToRender(this.getRealCell());
                 return;
             }
         }
@@ -45,13 +45,13 @@ class StorageCell extends BodyCell {
     retrieveFood(foodType) {
         if (this.storedFood === null) return false;
         
-        if (foodType === "any" || this.storedFood === foodType) {
-            const retrieved = this.storedFood;
-            this.storedFood = null;
-            return retrieved;
+        if (foodType !== "any" && foodType !== "food" && this.storedFood !== foodType) {
+            return false;
         }
         
-        return false;
+        const retrieved = this.storedFood;
+        this.storedFood = null;
+        return retrieved;
     }
 
     initInherit(parent) {

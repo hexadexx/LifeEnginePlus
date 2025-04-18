@@ -44,10 +44,16 @@ class CarnivoreMouthCell extends BodyCell {
         for (var loc of Hyperparams.edibleNeighbors) {
             var cell = env.grid_map.cellAt(real_c + loc[0], real_r + loc[1]);
             if (cell && cell.cell_owner && cell.cell_owner.state === CellStates.storage) {
-                const foodType = cell.cell_owner.retrieveFood("meat");
-                if (foodType === "meat" || foodType === "food") {
+                let foodType = cell.cell_owner.retrieveFood("meat");
+                if (foodType) {
                     this.org.food_collected++;
-                    env.renderer.addToRender(cell); 
+                    env.renderer.addToRender(cell);
+                    return;
+                }
+                foodType = cell.cell_owner.retrieveFood("food");
+                if (foodType) {
+                    this.org.food_collected++;
+                    env.renderer.addToRender(cell);
                     return;
                 }
             }

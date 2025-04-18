@@ -257,19 +257,6 @@ input:hover,input:active {
     position: absolute;
 }
 
-.cell-type#carnivoreMouth::after,
-.cell-type#herbivoreMouth::after,
-.cell-type#leftRightMover::after,
-.cell-type#upDownMover::after,
-.cell-type#rotationMover::after,
-.cell-legend-type#carnivoreMouth::after,
-.cell-legend-type#herbivoreMouth::after,
-.cell-legend-type#leftRightMover::after,
-.cell-legend-type#upDownMover::after,
-.cell-legend-type#rotationMover::after {
-    display: none;
-}
-
 #cell-selections {
     display: flex;
     flex-direction: column;

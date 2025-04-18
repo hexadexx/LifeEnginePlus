@@ -70,7 +70,7 @@ class Wall extends CellState {
         super('wall');
     }
 }
-class CarnivoreMount extends CellState {
+class CarnivoreMouth extends CellState {
     constructor() {
         super('carnivoreMouth');
     }
@@ -249,7 +249,7 @@ const CellStates = {
     plant: new Plant(),
     meat: new Meat(),
     wall: new Wall(),
-    carnivoreMouth: new CarnivoreMount(),
+    carnivoreMouth: new CarnivoreMouth(),
     herbivoreMouth: new HerbivoreMouth(),
     producer: new Producer(),
     mover: new Mover(),

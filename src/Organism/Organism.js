@@ -301,7 +301,9 @@ class Organism {
                 return this.living;
         }
         
-        if (this.anatomy.is_mover || this.anatomy.is_ud_mover || this.anatomy.is_lr_mover) {
+        const canMove = this.anatomy.is_mover || this.anatomy.is_ud_mover || this.anatomy.is_lr_mover || this.anatomy.is_rotation_mover;
+        
+        if (canMove) {
             this.move_count++;
             var changed_dir = false;
             
@@ -315,16 +317,19 @@ class Organism {
             
             if (this.anatomy.is_mover) {
                 moved = this.attemptMove();
-            } else if (this.anatomy.is_ud_mover && this.anatomy.is_lr_mover) {
+            } 
+            else if (this.anatomy.is_ud_mover && this.anatomy.is_lr_mover) {
                 moved = this.attemptMove();
-            } else if (this.anatomy.is_ud_mover) {
+            } 
+            else if (this.anatomy.is_ud_mover) {
                 if (this.direction === Directions.up || this.direction === Directions.down) {
                     moved = this.attemptMove();
                 } else {
                     this.changeDirection(Math.random() < 0.5 ? Directions.up : Directions.down);
                     moved = this.attemptMove();
                 }
-            } else if (this.anatomy.is_lr_mover) {
+            } 
+            else if (this.anatomy.is_lr_mover) {
                 if (this.direction === Directions.left || this.direction === Directions.right) {
                     moved = this.attemptMove();
                 } else {
@@ -361,6 +366,7 @@ class Organism {
         
         return this.living;
     }
+
 
     getRealCell(local_cell, c=this.c, r=this.r, rotation=this.rotation){
         var real_c = c + local_cell.rotatedCol(rotation);
