@@ -106,85 +106,85 @@
 						  
 
 										  
-							<div class='cell-type-content'>
-							  <div class="cell-category" id="mouth-category" data-category="mouth">
-								<div class="cell-type-container">
-								  <div class='cell-type' id='carnivoreMouth' title="Carnivore Mouth: Eats meat and generic food">
-									<div class="cell-type-label">Carnivore</div>
-								  </div>
+								<div class='cell-type-content'>
+								<div class="cell-category" id="mouth-category" data-category="mouth">
+									<div class="cell-type-container">
+									<div class='cell-type' id='carnivoreMouth' title="Carnivore Mouth: Eats meat and generic food">
+										<div class="cell-type-label">Carnivore</div>
+									</div>
+									</div>
+									<div class="cell-type-container">
+									<div class='cell-type' id='herbivoreMouth' title="Herbivore Mouth: Eats plant matter and generic food">
+										<div class="cell-type-label">Herbivore</div>
+									</div>
+									</div>
 								</div>
-								<div class="cell-type-container">
-								  <div class='cell-type' id='herbivoreMouth' title="Herbivore Mouth: Eats plant matter and generic food">
-									<div class="cell-type-label">Herbivore</div>
-								  </div>
+													
+								<div class="cell-category" id="mover-category" data-category="mover" style="display:none;">
+									<div class="cell-type-container">
+									<div class='cell-type' id='mover' title="Mover: Allows for movement and rotation">
+										<div class="cell-type-label">Basic Mover</div>
+									</div>
+									</div>
+									<div class="cell-type-container">
+									<div class='cell-type' id='leftRightMover' title="Left-Right Mover: Moves primarily left and right">
+										<div class="cell-type-label">L-R Mover</div>
+									</div>
+									</div>
+									<div class="cell-type-container">
+									<div class='cell-type' id='upDownMover' title="Up-Down Mover: Moves primarily up and down">
+										<div class="cell-type-label">U-D Mover</div>
+									</div>
+									</div>
+									<div class="cell-type-container">
+									<div class='cell-type' id='rotationMover' title="Rotation Mover: Specializes in rotation">
+										<div class="cell-type-label">Rotator</div>
+									</div>
+									</div>
 								</div>
-							  </div>
-												  
-							  <div class="cell-category" id="mover-category" data-category="mover" style="display:none;">
-								<div class="cell-type-container">
-								  <div class='cell-type' id='mover' title="Mover: Allows for movement and rotation">
-									<div class="cell-type-label">Basic Mover</div>
-								  </div>
+													
+								<div class="cell-category" id="defensive-category" data-category="defensive" style="display:none;">
+									<div class="cell-type-container">
+									<div class='cell-type' id='armor' title="Armor: Negates effects of killer cells">
+										<div class="cell-type-label">Armor</div>
+									</div>
+									</div>
 								</div>
-								<div class="cell-type-container">
-								  <div class='cell-type' id='leftRightMover' title="Left-Right Mover: Moves primarily left and right">
-									<div class="cell-type-label">L-R Mover</div>
-								  </div>
+													
+								<div class="cell-category" id="offensive-category" data-category="offensive" style="display:none;">
+									<div class="cell-type-container">
+									<div class='cell-type' id='killer' title="Killer: Harms organisms in adjacent cells">
+										<div class="cell-type-label">Killer</div>
+									</div>
+									</div>
 								</div>
-								<div class="cell-type-container">
-								  <div class='cell-type' id='upDownMover' title="Up-Down Mover: Moves primarily up and down">
-									<div class="cell-type-label">U-D Mover</div>
-								  </div>
+													
+								<div class="cell-category" id="sensory-category" data-category="sensory" style="display:none;">
+									<div class="cell-type-container">
+									<div class='cell-type' id='eye' title="Eye: Looks for cells to move toward or away from. Click again to rotate">
+										<div class="cell-type-label">Eye</div>
+									</div>
+									</div>
 								</div>
-								<div class="cell-type-container">
-								  <div class='cell-type' id='rotationMover' title="Rotation Mover: Specializes in rotation">
-									<div class="cell-type-label">Rotator</div>
-								  </div>
+													
+								<div class="cell-category" id="resources-category" data-category="resources" style="display:none;">
+									<div class="cell-type-container">
+									<div class='cell-type' id='producer' title="Producer: Produces plant food in adjacent cells">
+										<div class="cell-type-label">Producer</div>
+									</div>
+									</div>
+										<div class="cell-type-container">
+										<div class='cell-type' id='storage' title="Storage: Stores adjacent food with its type">
+											<div class="cell-type-label">Storage</div>
+										</div>
+										</div>
+									</div>
 								</div>
-							  </div>
-												  
-							  <div class="cell-category" id="defensive-category" data-category="defensive" style="display:none;">
-								<div class="cell-type-container">
-								  <div class='cell-type' id='armor' title="Armor: Negates effects of killer cells">
-									<div class="cell-type-label">Armor</div>
-								  </div>
+								<div class="cell-type-buttons">
+									<button id='clear-editor'>Clear</button>
+									<button class='randomize-button' id='generate-random' title="Randomizes organism"><i class="fa fa-random"></i></button>
 								</div>
-							  </div>
-												  
-							  <div class="cell-category" id="offensive-category" data-category="offensive" style="display:none;">
-								<div class="cell-type-container">
-								  <div class='cell-type' id='killer' title="Killer: Harms organisms in adjacent cells">
-									<div class="cell-type-label">Killer</div>
-								  </div>
-								</div>
-							  </div>
-												  
-							  <div class="cell-category" id="sensory-category" data-category="sensory" style="display:none;">
-								<div class="cell-type-container">
-								  <div class='cell-type' id='eye' title="Eye: Looks for cells to move toward or away from. Click again to rotate">
-									<div class="cell-type-label">Eye</div>
-								  </div>
-								</div>
-							  </div>
-												  
-							  <div class="cell-category" id="resources-category" data-category="resources" style="display:none;">
-								<div class="cell-type-container">
-								  <div class='cell-type' id='producer' title="Producer: Produces plant food in adjacent cells">
-									<div class="cell-type-label">Producer</div>
-								  </div>
-								</div>
-								<div class="cell-type-container">
-								  <div class='cell-type' id='storage' title="Storage: Stores adjacent food with its type">
-									<div class="cell-type-label">Storage</div>
-								  </div>
-								</div>
-							  </div>
 							</div>
-							<div class="cell-type-buttons">
-								<button id='clear-editor'>Clear</button>
-								<button class='randomize-button' id='generate-random' title="Randomizes organism"><i class="fa fa-random"></i></button>
-							  </div>
-						  </div>
 						
 					</div>
 					<div class='right-half'>
