@@ -9,7 +9,7 @@ class LeftRightMoverCell extends BodyCell {
     }
     
     performFunction() {
-        if (this.org.anatomy.is_mover) return;
+        if (this.org.anatomy.is_mover || (this.org.anatomy.is_ud_mover && this.org.anatomy.is_lr_mover)) return;
         
         if (this.org.direction !== Directions.left && this.org.direction !== Directions.right) {
             this.org.direction = Math.random() < 0.5 ? Directions.left : Directions.right;
