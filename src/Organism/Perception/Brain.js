@@ -47,7 +47,6 @@ class Brain {
             this.decisions[CellStates.killer.name] = Decision.getRandom();
         }
         
-        // Randomize decisions for the various cell types
         this.decisions[CellStates.carnivoreMouth.name] = Decision.getRandom();
         this.decisions[CellStates.herbivoreMouth.name] = Decision.getRandom();
         this.decisions[CellStates.producer.name] = Decision.getRandom();
@@ -55,6 +54,7 @@ class Brain {
         this.decisions[CellStates.armor.name] = Decision.getRandom();
         this.decisions[CellStates.eye.name] = Decision.getRandom();
         this.decisions[CellStates.storage.name] = Decision.getRandom();
+        this.decisions[CellStates.converter.name] = Decision.getRandom();
     }
 
     observe(observation) {

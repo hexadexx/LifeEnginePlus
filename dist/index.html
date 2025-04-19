@@ -63,6 +63,7 @@
 							<div class='cell-legend-type' id='armor' title="Armor: Negates effects of killer cells"></div>
 							<div class='cell-legend-type' id='eye' title="Eye: Observes cells and decides movement"></div>
 							<div class='cell-legend-type' id='storage' title="Storage: Stores adjacent food with its type"></div>
+							<div class='cell-legend-type' id='converter' title="Converter: Converts food types based on adjacent mouths"></div>
 							<div class='cell-legend-type' id='food' title="Food: Generic food that can be eaten by any mouth"></div>
 							<div class='cell-legend-type' id='plant' title="Plant: Created by producers, eaten by herbivores"></div>
 							<div class='cell-legend-type' id='meat' title="Meat: Created when organisms die, eaten by carnivores"></div>
@@ -169,14 +170,18 @@
 													
 								<div class="cell-category" id="resources-category" data-category="resources" style="display:none;">
 									<div class="cell-type-container">
-									<div class='cell-type' id='producer' title="Producer: Produces plant food in adjacent cells">
-										<div class="cell-type-label">Producer</div>
+										<div class='cell-type' id='producer' title="Producer: Produces plant food in adjacent cells">
+											<div class="cell-type-label">Producer</div>
+										</div>
 									</div>
-									</div>
-										<div class="cell-type-container">
+									<div class="cell-type-container">
 										<div class='cell-type' id='storage' title="Storage: Stores adjacent food with its type">
 											<div class="cell-type-label">Storage</div>
 										</div>
+									</div>
+									<div class="cell-type-container">
+										<div class='cell-type' id='converter' title="Converter: Converts food types based on adjacent mouths">
+											<div class="cell-type-label">Converter</div>
 										</div>
 									</div>
 								</div>
@@ -234,6 +239,7 @@
 									<option value="armor">armor</option>
 									<option value="eye">eye</option>
 									<option value="storage">storage</option>
+									<option value="converter">converter</option>
 								</select>
 
 								<label for="reaction-edit">Reaction: </label>
