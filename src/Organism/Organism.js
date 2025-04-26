@@ -37,13 +37,28 @@ class Organism {
         for (var c of parent.anatomy.cells){
             this.anatomy.addInheritCell(c);
         }
-        if(parent.anatomy.is_mover && parent.anatomy.has_eyes) {
+        if((parent.anatomy.is_mover || parent.anatomy.is_ud_mover || parent.anatomy.is_lr_mover) && parent.anatomy.has_eyes) {
             this.brain.copy(parent.brain);
         }
     }
 
     foodNeeded() {
-        return this.anatomy.is_mover ? this.anatomy.cells.length + Hyperparams.extraMoverFoodCost : this.anatomy.cells.length;
+        let baseFood = this.anatomy.cells.length;
+        
+        if (this.anatomy.is_mover || this.anatomy.is_ud_mover || this.anatomy.is_lr_mover) {
+            baseFood += Hyperparams.extraMoverFoodCost;
+        }
+        
+        let loadedStorageCount = 0;
+        for (let cell of this.anatomy.cells) {
+            if (cell.state === CellStates.storage && cell.storedFood !== null) {
+                loadedStorageCount++;
+            }
+        }
+        
+        let storageCost = Math.floor(loadedStorageCount / 2);
+        
+        return baseFood + storageCost;
     }
 
     lifespan() {
@@ -74,7 +89,7 @@ class Organism {
         } 
         var mutated = false;
         if (Math.random() * 100 <= prob) {
-            if (org.anatomy.is_mover && Math.random() * 100 <= 10) { 
+            if ((org.anatomy.is_mover || org.anatomy.is_ud_mover || org.anatomy.is_lr_mover) && Math.random() * 100 <= 10) { 
                 if (org.anatomy.has_eyes) {
                     org.brain.mutate();
                 }
@@ -309,9 +324,7 @@ class Organism {
             
             var moved = false;
             
-            if (this.anatomy.is_mover) {
-                moved = this.attemptMove();
-            } else if (this.anatomy.is_ud_mover && this.anatomy.is_lr_mover) {
+            if (this.anatomy.is_mover || (this.anatomy.is_ud_mover && this.anatomy.is_lr_mover)) {
                 moved = this.attemptMove();
             } else if (this.anatomy.is_ud_mover) {
                 if (this.direction === Directions.up || this.direction === Directions.down) {
@@ -339,9 +352,9 @@ class Organism {
                 if (!rotated) {
                     let newDirection;
                     
-                    if (this.anatomy.is_ud_mover && !this.anatomy.is_lr_mover && !this.anatomy.is_mover) {
+                    if (this.anatomy.is_ud_mover && !this.anatomy.is_lr_mover) {
                         newDirection = this.direction === Directions.up ? Directions.down : Directions.up;
-                    } else if (this.anatomy.is_lr_mover && !this.anatomy.is_ud_mover && !this.anatomy.is_mover) {
+                    } else if (this.anatomy.is_lr_mover && !this.anatomy.is_ud_mover) {
                         newDirection = this.direction === Directions.left ? Directions.right : Directions.left;
                     } else {
                         newDirection = Directions.getRandomDirection();
@@ -387,7 +400,7 @@ class Organism {
     serialize() {
         let org = SerializeHelper.copyNonObjects(this);
         org.anatomy = this.anatomy.serialize();
-        if (this.anatomy.is_mover && this.anatomy.has_eyes)
+        if ((this.anatomy.is_mover || this.anatomy.is_ud_mover || this.anatomy.is_lr_mover) && this.anatomy.has_eyes)
             org.brain = this.brain.serialize();
         org.species_name = this.species.name;
         return org;
