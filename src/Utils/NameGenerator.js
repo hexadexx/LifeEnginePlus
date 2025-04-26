@@ -42,6 +42,10 @@ const NameGenerator = {
     },
     
     getNameForCellType(cellType) {
+        if (Math.random() < 0.05) {
+            return this.getNeutralName();
+        }
+        
         const wordList = NameList[cellType];
         if (!wordList || wordList.length === 0) {
             return this.getRandomItem(NameList.neutral || ['unknown']);
@@ -53,23 +57,26 @@ const NameGenerator = {
         return this.getRandomItem(NameList.neutral || ['unknown']);
     },
     
-    createCombinedName(cellType1, cellType2) {
-        const name1 = this.getNameForCellType(cellType1);
-        const name2 = this.getNameForCellType(cellType2);
-        
+    createCombinedNameFromWords(word1, word2) {
         const vowels = ['a', 'e', 'i', 'o', 'u'];
         
-        let breakPoint1 = Math.ceil(name1.length * 0.6);
-        while (breakPoint1 > 1 && vowels.includes(name1[breakPoint1 - 1].toLowerCase())) {
+        let breakPoint1 = Math.ceil(word1.length * 0.6);
+        while (breakPoint1 > 1 && vowels.includes(word1[breakPoint1 - 1].toLowerCase())) {
             breakPoint1--;
         }
         
-        let breakPoint2 = Math.floor(name2.length * 0.4);
-        while (breakPoint2 < name2.length - 1 && !vowels.includes(name2[breakPoint2].toLowerCase())) {
+        let breakPoint2 = Math.floor(word2.length * 0.4);
+        while (breakPoint2 < word2.length - 1 && !vowels.includes(word2[breakPoint2].toLowerCase())) {
             breakPoint2++;
         }
         
-        return name1.substring(0, breakPoint1) + name2.substring(breakPoint2);
+        return word1.substring(0, breakPoint1) + word2.substring(breakPoint2);
+    },
+    
+    createCombinedName(cellType1, cellType2) {
+        const name1 = this.getNameForCellType(cellType1);
+        const name2 = this.getNameForCellType(cellType2);
+        return this.createCombinedNameFromWords(name1, name2);
     },
 
     generateName(anatomy, ancestor = null, useSpaces = true) {
@@ -92,7 +99,7 @@ const NameGenerator = {
             return Math.random().toString(36).substr(2, 10);
         }
         
-        const nameComponents = [];
+        let nameComponents = [];
         const totalCells = anatomy.cells.length;
         const totalCellTypes = allCellTypes.length;
         
@@ -106,8 +113,6 @@ const NameGenerator = {
         if (componentCount === 1) {
             if (dominantTypes.length > 0) {
                 const cellType = dominantTypes[0];
-                const cellName = this.getNameForCellType(cellType);
-                const neutralName = this.getNeutralName();
                 nameComponents.push(this.createCombinedName(cellType, 'neutral'));
             } else {
                 nameComponents.push(this.getNeutralName());
@@ -142,29 +147,55 @@ const NameGenerator = {
             }
         }
         
-        if (ancestor && ancestor.name && nameComponents.length > 1) {
-            const ancestorName = ancestor.name;
+        if (ancestor && ancestor.name) {
             const delimiter = useSpaces ? ' ' : '-';
-            const ancestorParts = ancestorName.split(delimiter);
+            const ancestorParts = ancestor.name.split(delimiter);
             
-            if (ancestorParts.length > 0 && Math.random() < 0.85) {
-                let inheritedPart;
-                const position = Math.random();
-                
-                if (position < 0.5 && ancestorParts.length > 0) {
-                    inheritedPart = ancestorParts[0];
-                    if (nameComponents.length > 0) {
-                        nameComponents[0] = inheritedPart;
+            if (!ancestor.name.includes(" ") && componentCount === 1) {
+                const newName = this.getNameForCellType(this.getRandomItem(dominantTypes));
+                nameComponents[0] = this.createCombinedNameFromWords(ancestorParts[0], newName);
+            }
+            else {
+                if (ancestorParts.length >= 3 && Math.random() < 0.5) {
+                    if (ancestorParts.length >= 4 && Math.random() < 0.5) {
+                        const partsToKeep = Math.floor(Math.random() * 2) + 2;
+                        const inheritedParts = ancestorParts.slice(0, partsToKeep);
+                        
+                        const newPartsCount = ancestorParts.length - partsToKeep;
+                        const newParts = [];
+                        for (let i = 0; i < newPartsCount; i++) {
+                            newParts.push(this.getNameForCellType(this.getRandomItem(dominantTypes)));
+                        }
+                        
+                        nameComponents = [...inheritedParts, ...newParts];
                     } else {
-                        nameComponents.push(inheritedPart);
+                        const keepParts = ancestorParts.length - 1;
+                        const inheritedParts = ancestorParts.slice(0, keepParts);
+                        
+                        if (nameComponents.length > 0) {
+                            nameComponents = [...inheritedParts, nameComponents[0]];
+                        } else {
+                            nameComponents = [...inheritedParts, this.getNameForCellType(this.getRandomItem(dominantTypes))];
+                        }
                     }
-                } else {
-                    inheritedPart = ancestorParts[ancestorParts.length - 1];
-                    if (nameComponents.length > 0) {
-                        nameComponents[nameComponents.length - 1] = inheritedPart;
+                }
+                else if (Math.random() < 0.25) {
+                    const keepFirst = Math.random() < 0.85; 
+                    if (keepFirst) {
+                        nameComponents[0] = ancestorParts[0];
                     } else {
-                        nameComponents.push(inheritedPart);
+                        nameComponents[0] = ancestorParts[ancestorParts.length - 1];
                     }
+                }
+                else if (Math.random() < 0.05 && nameComponents.length > 0) {
+                    const useFirst = Math.random() < 0.5;
+                    const ancestorPart = useFirst ? ancestorParts[0] : ancestorParts[ancestorParts.length - 1];
+                    nameComponents[0] = ancestorPart + nameComponents[0];
+                }
+                else {
+                    const position = Math.random() < 0.5 ? 0 : nameComponents.length - 1;
+                    const ancestorPosition = Math.random() < 0.5 ? 0 : ancestorParts.length - 1;
+                    nameComponents[position] = ancestorParts[ancestorPosition];
                 }
             }
         }

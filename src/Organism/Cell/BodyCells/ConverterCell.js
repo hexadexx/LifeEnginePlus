@@ -18,7 +18,8 @@ class ConverterCell extends BodyCell {
             
             if (cell.cell_owner && cell.cell_owner.state === CellStates.storage) {
                 this.processStorage(cell.cell_owner, cell.col, cell.row, env);
-            } else if ((cell.state === CellStates.plant || cell.state === CellStates.meat) && !cell.cell_owner) {
+            } 
+            else if ((cell.state === CellStates.plant || cell.state === CellStates.meat) && !cell.cell_owner) {
                 this.processFood(cell, env);
             }
         }

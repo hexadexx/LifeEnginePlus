@@ -7,10 +7,12 @@ class StorageCell extends BodyCell {
         super(CellStates.storage, org, loc_col, loc_row);
         this.storedFood = null;
         this.lastEjectRotTime = 0;
+        this.storageTime = 0;
     }
 
     performFunction() {
         if (this.storedFood !== null) {
+            this.storageTime++;
             return;
         }
 
@@ -24,12 +26,14 @@ class StorageCell extends BodyCell {
             
             if (cell.state === CellStates.food) {
                 this.storedFood = "food";
+                this.storageTime = 0;
                 env.changeCell(cell.col, cell.row, CellStates.empty, null);
                 env.renderer.addToRender(this.getRealCell());
                 return;
             } 
             else if (cell.state === CellStates.meat) {
                 this.storedFood = "meat";
+                this.storageTime = 0;
                 this.lastEjectRotTime = cell.rotTime || 0;
                 env.changeCell(cell.col, cell.row, CellStates.empty, null);
                 env.renderer.addToRender(this.getRealCell());
@@ -37,6 +41,7 @@ class StorageCell extends BodyCell {
             }
             else if (cell.state === CellStates.plant) {
                 this.storedFood = "plant";
+                this.storageTime = 0;
                 env.changeCell(cell.col, cell.row, CellStates.empty, null);
                 env.renderer.addToRender(this.getRealCell());
                 return;
@@ -45,11 +50,12 @@ class StorageCell extends BodyCell {
     }
 
     retrieveFood(foodType) {
-        if (this.storedFood === null) return false;
+        if (this.storedFood === null || this.storageTime < 5) return false;
         
         if (foodType === "any" || this.storedFood === foodType) {
             const retrieved = this.storedFood;
             this.storedFood = null;
+            this.storageTime = 0;
             return retrieved;
         }
         
@@ -60,6 +66,7 @@ class StorageCell extends BodyCell {
         super.initInherit(parent);
         this.storedFood = parent.storedFood;
         this.lastEjectRotTime = parent.lastEjectRotTime || 0;
+        this.storageTime = parent.storageTime || 0;
     }
     
     releaseStoredFood() {
@@ -85,6 +92,7 @@ class StorageCell extends BodyCell {
                 
                 env.changeCell(cell.col, cell.row, foodState, null);
                 this.storedFood = null;
+                this.storageTime = 0;
                 return true;
             }
         }

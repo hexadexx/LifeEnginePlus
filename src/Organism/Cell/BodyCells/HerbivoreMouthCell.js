@@ -19,11 +19,12 @@ class HerbivoreMouthCell extends BodyCell {
             if (this.eatNeighbor(cell, env)) {
                 foundFood = true;
                 this.lastEatenCell = cell;
+                return;
             }
         }
         
         if (!foundFood) {
-            this.checkStorageCells();
+            this.checkAnyCellStorage();
         }
     }
 
@@ -39,22 +40,26 @@ class HerbivoreMouthCell extends BodyCell {
         return false;
     }
     
-    checkStorageCells() {
+    checkAnyCellStorage() {
         var env = this.org.env;
         var real_c = this.getRealCol();
         var real_r = this.getRealRow();
         
         for (var loc of Hyperparams.edibleNeighbors) {
             var cell = env.grid_map.cellAt(real_c + loc[0], real_r + loc[1]);
-            if (cell && cell.cell_owner && cell.cell_owner.state === CellStates.storage) {
+            if (!cell) continue;
+            
+            if (cell.cell_owner && cell.cell_owner.state === CellStates.storage) {
                 const foodType = cell.cell_owner.retrieveFood("plant");
                 if (foodType === "plant" || foodType === "food") {
                     this.org.food_collected++;
-                    env.renderer.addToRender(cell); 
-                    return;
+                    env.renderer.addToRender(cell);
+                    return true;
                 }
             }
         }
+        
+        return false;
     }
 }
 
