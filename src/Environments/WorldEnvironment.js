@@ -9,6 +9,7 @@ const FossilRecord = require('../Stats/FossilRecord');
 const WorldConfig = require('../WorldConfig');
 const SerializeHelper = require('../Utils/SerializeHelper');
 const Species = require('../Stats/Species');
+const Neighbors = require('../Grid/Neighbors');
 
 class WorldEnvironment extends Environment{
     constructor(cell_size) {
@@ -25,7 +26,10 @@ class WorldEnvironment extends Environment{
         this.reset_count = 0;
         this.total_ticks = 0;
         this.data_update_rate = 100;
+        this.pendingDepthUpdate = false;
+        this.depthUpdateTimeout = null;
         FossilRecord.setEnv(this);
+        this.updateDepths();
     }
 
     update() {
@@ -107,11 +111,30 @@ class WorldEnvironment extends Environment{
     }
 
     changeCell(c, r, state, owner) {
+        const targetStates = [CellStates.wall, CellStates.food, CellStates.plant, CellStates.meat];
+        const prevCell = this.grid_map.cellAt(c, r);
+        const prevState = prevCell ? prevCell.state : null;
+        
         super.changeCell(c, r, state, owner);
         this.renderer.addToRender(this.grid_map.cellAt(c, r));
-        if(state == CellStates.wall)
+        
+        if (state == CellStates.wall)
             this.walls.push(this.grid_map.cellAt(c, r));
+        
+        if ((targetStates.includes(state) || (prevState && targetStates.includes(prevState))) && !this.pendingDepthUpdate) {
+            this.pendingDepthUpdate = true;
+            
+            if (this.depthUpdateTimeout) {
+                clearTimeout(this.depthUpdateTimeout);
+            }
+            
+            this.depthUpdateTimeout = setTimeout(() => {
+                this.updateDepths();
+                this.pendingDepthUpdate = false;
+            }, 10);
+        }
     }
+    
 
     clearWalls() {
         for(var wall of this.walls){
@@ -164,6 +187,7 @@ class WorldEnvironment extends Environment{
         FossilRecord.clear_record();
         if (reset_life)
             this.OriginOfLife();
+        this.updateDepths();
         return true;
     }
 
@@ -236,6 +260,82 @@ class WorldEnvironment extends Environment{
         if ($('#override-controls').is(':checked'))
             Hyperparams.loadJsonObj(env.controls)
         this.renderer.renderFullGrid(this.grid_map.grid);
+    }
+
+    updateDepths() {
+        const targetStates = [CellStates.wall, CellStates.food, CellStates.plant, CellStates.meat];
+        
+        const cellGroups = {};
+        for (const stateType of targetStates) {
+            cellGroups[stateType.name] = [];
+        }
+        
+        for (let c = 0; c < this.grid_map.cols; c++) {
+            for (let r = 0; r < this.grid_map.rows; r++) {
+                const cell = this.grid_map.cellAt(c, r);
+                if (cell && targetStates.includes(cell.state)) {
+                    cellGroups[cell.state.name].push(cell);
+                    cell.depth = 0; 
+                }
+            }
+        }
+        
+        for (const stateType of targetStates) {
+            const cells = cellGroups[stateType.name];
+            if (cells.length === 0) continue;
+            
+            for (const cell of cells) {
+                if (cell.col === 0 || cell.row === 0 || 
+                    cell.col === this.grid_map.cols - 1 || 
+                    cell.row === this.grid_map.rows - 1) {
+                    cell.depth = 1;
+                    continue;
+                }
+                
+                let isEdge = false;
+                for (const loc of Neighbors.all) {
+                    const nc = cell.col + loc[0];
+                    const nr = cell.row + loc[1];
+                    const neighbor = this.grid_map.cellAt(nc, nr);
+                    
+                    if (!neighbor || neighbor.state !== cell.state) {
+                        isEdge = true;
+                        break;
+                    }
+                }
+                
+                if (isEdge) {
+                    cell.depth = 1;
+                }
+            }
+            
+            for (const cell of cells) {
+                if (cell.depth !== 0) continue;
+                
+                for (const loc of Neighbors.all) {
+                    const nc = cell.col + loc[0];
+                    const nr = cell.row + loc[1];
+                    const neighbor = this.grid_map.cellAt(nc, nr);
+                    
+                    if (neighbor && neighbor.state === cell.state && neighbor.depth === 1) {
+                        cell.depth = 2;
+                        break;
+                    }
+                }
+            }
+            
+            for (const cell of cells) {
+                if (cell.depth === 0) {
+                    cell.depth = 3;
+                }
+            }
+        }
+        
+        for (const stateType of targetStates) {
+            for (const cell of cellGroups[stateType.name]) {
+                this.renderer.addToRender(cell);
+            }
+        }
     }
 }
 

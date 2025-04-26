@@ -1,4 +1,4 @@
-class CellState{
+class CellState {
     constructor(name) {
         this.name = name;
         this.color = 'black';
@@ -8,7 +8,19 @@ class CellState{
         ctx.fillStyle = this.color;
         ctx.fillRect(cell.x, cell.y, size, size);
     }
+    
+    darkenColor(hex, amount) {
+        hex = hex.replace(/^#/, '');
+        let r = parseInt(hex.substring(0, 2), 16);
+        let g = parseInt(hex.substring(2, 4), 16);
+        let b = parseInt(hex.substring(4, 6), 16);
+        r = Math.max(0, Math.floor(r * (1 - amount)));
+        g = Math.max(0, Math.floor(g * (1 - amount)));
+        b = Math.max(0, Math.floor(b * (1 - amount)));
+        return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+    }
 }
+
 
 class Empty extends CellState {
     constructor() {
@@ -19,16 +31,18 @@ class Food extends CellState {
     constructor() {
         super('food');
     }
+    
     render(ctx, cell, size) {
-        ctx.fillStyle = this.color;
+        const depth = Math.min(cell.depth || 1, 3);
+        let color;
+        switch (depth) {
+            case 1: color = this.color; break;
+            case 2: color = this.darkenColor(this.color, 0.15); break;
+            case 3: color = this.darkenColor(this.color, 0.3); break;
+            default: color = this.color;
+        }
+        ctx.fillStyle = color;
         ctx.fillRect(cell.x, cell.y, size, size);
-        
-        if(size <= 1) return;
-        
-        const innerSize = size / 2;
-        const offset = (size - innerSize) / 2;
-        ctx.fillStyle = "#1D4970"; 
-        ctx.fillRect(cell.x + offset, cell.y + offset, innerSize, innerSize);
     }
 }
 
@@ -36,16 +50,18 @@ class Plant extends CellState {
     constructor() {
         super('plant');
     }
+    
     render(ctx, cell, size) {
-        ctx.fillStyle = this.color;
+        const depth = Math.min(cell.depth || 1, 3);
+        let color;
+        switch (depth) {
+            case 1: color = this.color; break;
+            case 2: color = this.darkenColor(this.color, 0.15); break;
+            case 3: color = this.darkenColor(this.color, 0.3); break;
+            default: color = this.color;
+        }
+        ctx.fillStyle = color;
         ctx.fillRect(cell.x, cell.y, size, size);
-        
-        if(size <= 1) return;
-        
-        const innerSize = size / 2;
-        const offset = (size - innerSize) / 2;
-        ctx.fillStyle = "#50AA50"; 
-        ctx.fillRect(cell.x + offset, cell.y + offset, innerSize, innerSize);
     }
 }
 
@@ -53,23 +69,40 @@ class Meat extends CellState {
     constructor() {
         super('meat');
     }
+    
     render(ctx, cell, size) {
-        ctx.fillStyle = this.color;
+        const depth = Math.min(cell.depth || 1, 3);
+        let color;
+        switch (depth) {
+            case 1: color = this.color; break;
+            case 2: color = this.darkenColor(this.color, 0.15); break;
+            case 3: color = this.darkenColor(this.color, 0.3); break;
+            default: color = this.color;
+        }
+        ctx.fillStyle = color;
         ctx.fillRect(cell.x, cell.y, size, size);
-        
-        if(size <= 1) return;
-        
-        const innerSize = size / 2;
-        const offset = (size - innerSize) / 2;
-        ctx.fillStyle = "#C95050"; 
-        ctx.fillRect(cell.x + offset, cell.y + offset, innerSize, innerSize);
     }
 }
+
 class Wall extends CellState {
     constructor() {
         super('wall');
     }
+    
+    render(ctx, cell, size) {
+        const depth = Math.min(cell.depth || 1, 3);
+        let color;
+        switch (depth) {
+            case 1: color = this.color; break;
+            case 2: color = this.darkenColor(this.color, 0.15); break;
+            case 3: color = this.darkenColor(this.color, 0.3); break;
+            default: color = this.color;
+        }
+        ctx.fillStyle = color;
+        ctx.fillRect(cell.x, cell.y, size, size);
+    }
 }
+
 class CarnivoreMouth extends CellState {
     constructor() {
         super('carnivoreMouth');

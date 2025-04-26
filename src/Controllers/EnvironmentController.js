@@ -119,14 +119,30 @@ class EnvironmentController extends CanvasController{
                         this.dropCellType(cell.col, cell.row, CellStates.empty, false, CellStates.wall);
                     }
                     break;
+                case Modes.MeatDrop:
+                    if (left_click){
+                        this.dropCellType(cell.col, cell.row, CellStates.meat, false, CellStates.wall);
+                    }
+                    else if (right_click){
+                        this.dropCellType(cell.col, cell.row, CellStates.empty, false, CellStates.wall);
+                    }
+                    break;
+                case Modes.PlantDrop:
+                    if (left_click){
+                        this.dropCellType(cell.col, cell.row, CellStates.plant, false, CellStates.wall);
+                    }
+                    else if (right_click){
+                        this.dropCellType(cell.col, cell.row, CellStates.empty, false, CellStates.wall);
+                    }
+                    break;
                 case Modes.WallDrop:
-                        if (left_click){
-                            this.dropCellType(cell.col, cell.row, CellStates.wall, true);
-                        }
-                        else if (right_click){
-                            this.dropCellType(cell.col, cell.row, CellStates.empty, false, CellStates.food);
-                        }
-                        break;
+                    if (left_click){
+                        this.dropCellType(cell.col, cell.row, CellStates.wall, true);
+                    }
+                    else if (right_click){
+                        this.dropCellType(cell.col, cell.row, CellStates.empty, false, CellStates.food);
+                    }
+                    break;
                 case Modes.ClickKill:
                     this.killNearOrganisms();
                     break;
