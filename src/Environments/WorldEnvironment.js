@@ -14,6 +14,7 @@ const Neighbors = require('../Grid/Neighbors');
 class WorldEnvironment extends Environment{
     constructor(cell_size) {
         super();
+        this.rotUpdateFrame = 0;
         this.renderer = new Renderer('env-canvas', 'env', cell_size);
         this.controller = new EnvironmentController(this, this.renderer.canvas);
         this.num_rows = Math.ceil(this.renderer.height / cell_size);
@@ -41,10 +42,140 @@ class WorldEnvironment extends Environment{
             }
         }
         this.removeOrganisms(to_remove);
+        
+        this.rotUpdateFrame++;
+        if (this.rotUpdateFrame % 10 !== 0) {
+            if (Hyperparams.foodDropProb > 0) {
+                this.generateFood();
+            }
+            this.total_ticks++;
+            if (this.total_ticks % this.data_update_rate == 0) {
+                FossilRecord.updateData();
+            }
+            return;
+        }
+        
+        if (this.rotUpdateFrame >= 10000) {
+            this.rotUpdateFrame = 0;
+        }
+
+        if (!this.cellsToProcess) {
+            this.cellsToProcess = [];
+            this.allCells = [];
+            for (var col of this.grid_map.grid) {
+                for (var cell of col) {
+                    if (cell.state === CellStates.meat || cell.state === CellStates.rot) {
+                        this.allCells.push(cell);
+                    }
+                }
+            }
+            this.chunkSize = 3500;
+            this.currentChunk = 0;
+            this.totalChunks = Math.ceil(this.allCells.length / this.chunkSize);
+        }
+        
+        const startIdx = this.currentChunk * this.chunkSize;
+        const endIdx = Math.min(startIdx + this.chunkSize, this.allCells.length);
+        
+        for (let i = startIdx; i < endIdx; i++) {
+            const cell = this.allCells[i];
+            
+            if (cell.state === CellStates.meat) {
+                if (cell.rotTime === undefined) {
+                    cell.rotTime = 0;
+                } else {
+                    cell.rotTime += 10; 
+                }
+                
+                if (cell.rotTime >= 10000) {
+                    this.cellsToProcess.push({
+                        col: cell.col,
+                        row: cell.row,
+                        action: 1
+                    });
+                } else {
+                    this.renderer.addToRender(cell);
+                }
+            }
+            else if (cell.state === CellStates.rot) {
+                if (cell.rotAge === undefined) {
+                    cell.rotAge = 0;
+                } else {
+                    cell.rotAge += 10; 
+                }
+                
+                if (cell.rotAge >= 250) {
+                    if (Math.random() < 0.02) {
+                        const neighbors = Hyperparams.growableNeighbors;
+                        const neighbor = neighbors[Math.floor(Math.random() * neighbors.length)];
+                        const neighborCol = cell.col + neighbor[0];
+                        const neighborRow = cell.row + neighbor[1];
+                        
+                        const neighborCell = this.grid_map.cellAt(neighborCol, neighborRow);
+                        if (neighborCell && neighborCell.state === CellStates.empty) {
+                            this.cellsToProcess.push({
+                                col: neighborCol,
+                                row: neighborRow,
+                                action: 2
+                            });
+                        } else if (Math.random() < 0.065) {
+                            this.cellsToProcess.push({
+                                col: cell.col,
+                                row: cell.row,
+                                action: 2
+                            });
+                        }
+                    }
+                }
+                
+                if (cell.rotAge >= 6000) {
+                    this.cellsToProcess.push({
+                        col: cell.col,
+                        row: cell.row,
+                        action: 3
+                    });
+                } else {
+                    this.renderer.addToRender(cell);
+                }
+            }
+        }
+        
+        for (const cellInfo of this.cellsToProcess) {
+            switch (cellInfo.action) {
+                case 1:
+                    const rotCell = this.grid_map.cellAt(cellInfo.col, cellInfo.row);
+                    if (rotCell && rotCell.state === CellStates.meat) {
+                        this.changeCell(cellInfo.col, cellInfo.row, CellStates.rot, null);
+                        const newRotCell = this.grid_map.cellAt(cellInfo.col, cellInfo.row);
+                        if (newRotCell) {
+                            newRotCell.rotAge = 0;
+                        }
+                    }
+                    break;
+                case 2:
+                    this.changeCell(cellInfo.col, cellInfo.row, CellStates.plant, null);
+                    break;
+                case 3:
+                    if (Math.random() < 0.5) {
+                        this.changeCell(cellInfo.col, cellInfo.row, CellStates.plant, null);
+                    } else {
+                        this.changeCell(cellInfo.col, cellInfo.row, CellStates.empty, null);
+                    }
+                    
+                    break;
+            }
+        }
+        this.cellsToProcess = [];
+        
+        this.currentChunk++;
+        if (this.currentChunk >= this.totalChunks) {
+            this.cellsToProcess = null;
+        }
+        
         if (Hyperparams.foodDropProb > 0) {
             this.generateFood();
         }
-        this.total_ticks ++;
+        this.total_ticks++;
         if (this.total_ticks % this.data_update_rate == 0) {
             FossilRecord.updateData();
         }
@@ -114,6 +245,10 @@ class WorldEnvironment extends Environment{
         const targetStates = [CellStates.wall, CellStates.food, CellStates.plant, CellStates.meat];
         const prevCell = this.grid_map.cellAt(c, r);
         const prevState = prevCell ? prevCell.state : null;
+        const cell = this.grid_map.cellAt(c, r);
+        if (cell) {
+            cell.rotTime = 0;
+        }
         
         super.changeCell(c, r, state, owner);
         this.renderer.addToRender(this.grid_map.cellAt(c, r));

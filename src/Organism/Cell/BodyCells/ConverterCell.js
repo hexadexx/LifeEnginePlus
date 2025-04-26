@@ -19,7 +19,7 @@ class ConverterCell extends BodyCell {
             if (cell.cell_owner && cell.cell_owner.state === CellStates.storage) {
                 this.processStorage(cell.cell_owner, cell.col, cell.row, env);
             } 
-            else if ((cell.state === CellStates.plant || cell.state === CellStates.meat) && !cell.cell_owner) {
+            else if ((cell.state === CellStates.plant || cell.state === CellStates.meat || cell.state === CellStates.rot) && !cell.cell_owner) {
                 this.processFood(cell, env);
             }
         }
@@ -65,10 +65,16 @@ class ConverterCell extends BodyCell {
                 hasCarnivoreMouth = true;
             }
         }
-        
+
         if (hasHerbivoreMouth && !hasCarnivoreMouth && foodCell.state === CellStates.meat) {
             env.changeCell(foodCell.col, foodCell.row, CellStates.plant, null);
         } else if (hasCarnivoreMouth && !hasHerbivoreMouth && foodCell.state === CellStates.plant) {
+            env.changeCell(foodCell.col, foodCell.row, CellStates.meat, null);
+        }
+
+        if (hasHerbivoreMouth && !hasCarnivoreMouth && foodCell.state === CellStates.rot) {
+            env.changeCell(foodCell.col, foodCell.row, CellStates.plant, null);
+        } else if (hasCarnivoreMouth && !hasHerbivoreMouth && foodCell.state === CellStates.rot) {
             env.changeCell(foodCell.col, foodCell.row, CellStates.meat, null);
         }
     }

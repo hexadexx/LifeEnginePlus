@@ -112,30 +112,49 @@ class Meat extends CellState {
     }
     
     render(ctx, cell, size) {
+        const rotTime = cell.rotTime || 0;
+        const maxRotTime = 10000;
+        
+        let colorFactor = Math.min(rotTime / maxRotTime, 1);
+        
+        const r = Math.max(0, Math.floor(209 - (colorFactor * 85)));
+        const g = Math.max(0, Math.floor(85 - (colorFactor * 25)));
+        const b = Math.max(0, Math.floor(99 - (colorFactor * 35)));
+        
+        const baseColor = `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+        
         const depth = Math.min(cell.depth || 1, 3);
-        let color;
         let noiseAmount;
         switch (depth) {
-            case 1: 
-                color = this.color; 
-                noiseAmount = 0.2;
-                break;
-            case 2: 
-                color = this.darkenColor(this.color, -0.15); 
-                noiseAmount = 0.15;
-                break;
-            case 3: 
-                color = this.darkenColor(this.color, -0.3); 
-                noiseAmount = 0.1;
-                break;
-            default: 
-                color = this.color;
-                noiseAmount = 0.2;
+            case 1: noiseAmount = 0.2; break;
+            case 2: noiseAmount = 0.15; break;
+            case 3: noiseAmount = 0.1; break;
+            default: noiseAmount = 0.2;
         }
+        
         const randomSeed = (cell.col * 1000 + cell.row) % 10000;
         Math.seedrandom(randomSeed);
         const darkenAmount = (Math.random() - 0.5) * noiseAmount;
-        const adjustedColor = this.darkenColor(color, darkenAmount);
+        const adjustedColor = this.darkenColor(baseColor, darkenAmount);
+        
+        ctx.fillStyle = adjustedColor;
+        ctx.fillRect(cell.x, cell.y, size, size);
+    }
+}
+
+class Rot extends CellState {
+    constructor() {
+        super('rot');
+    }
+    
+    render(ctx, cell, size) {
+        const randomSeed = (cell.col * 1000 + cell.row) % 10000;
+        Math.seedrandom(randomSeed);
+        const darkenAmount = (Math.random() - 0.5) * 0.2;
+        
+        let baseColor = this.color;
+        const adjustedColor = this.darkenColor(baseColor, darkenAmount);
+        
         ctx.fillStyle = adjustedColor;
         ctx.fillRect(cell.x, cell.y, size, size);
     }
@@ -440,12 +459,13 @@ const CellStates = {
     storage: new Storage(),
     eye: new Eye(),
     converter: new Converter(),
+    rot: new Rot(),
     defineLists() {
         this.all = [
             this.empty, this.food, this.plant, this.meat, this.wall, 
             this.carnivoreMouth, this.herbivoreMouth, this.producer, 
             this.mover, this.leftRightMover, this.upDownMover, this.rotationMover,
-            this.killer, this.armor, this.storage, this.eye, this.converter
+            this.killer, this.armor, this.storage, this.eye, this.converter, this.rot
         ]
         this.living = [
             this.carnivoreMouth, this.herbivoreMouth, this.producer, 
