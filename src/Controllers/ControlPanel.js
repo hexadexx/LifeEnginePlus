@@ -31,13 +31,13 @@ class ControlPanel {
     defineMinMaxControls(){
         this.control_panel_active = false;
         this.no_hud = false;
-        $('#minimize').click ( () => {
+        $('#minimize').click(() => {
             $('.control-panel').css('display', 'none');
             $('.hot-controls').css('display', 'block');
             this.control_panel_active = false;
             this.stats_panel.stopAutoRender();
         });
-        $('#maximize').click ( () => {
+        $('#maximize').click(() => {
             $('.control-panel').css('display', 'grid');
             $('.hot-controls').css('display', 'none');
             this.control_panel_active = true;
@@ -48,11 +48,10 @@ class ControlPanel {
     }
 
     defineHotkeys() {
-        $('body').keydown( (e) => {
+        $('body').keydown((e) => {
             let focused = document.activeElement;
             if (focused.tagName === "INPUT" && focused.type === "text") return;
             switch (e.key.toLowerCase()) {
-                // hot bar controls
                 case 'a':
                     $('.reset-view')[0].click();
                     break;
@@ -76,8 +75,7 @@ class ControlPanel {
                     e.preventDefault();
                     $('.pause-button')[0].click();
                     break;
-                // miscellaneous hotkeys
-                case 'q': // minimize/maximize control panel
+                case 'q':
                     e.preventDefault();
                     if (this.control_panel_active)
                         $('#minimize').click();
@@ -93,13 +91,13 @@ class ControlPanel {
                 case 'c':
                     $('#drop-org').click();
                     break;
-                case 'v': // toggle hud
+                case 'v':
                     if (this.no_hud) {
                         let control_panel_display = this.control_panel_active ? 'grid' : 'none';
                         let hot_control_display = !this.control_panel_active ? 'block' : 'none';
                         if (this.control_panel_active && this.tab_id == 'stats') {
                             this.stats_panel.startAutoRender();
-                        };
+                        }
                         $('.control-panel').css('display', control_panel_display);
                         $('.hot-controls').css('display', hot_control_display);
                         $('.community-section').css('display', 'block');
@@ -114,6 +112,9 @@ class ControlPanel {
                     break;
                 case 'b':
                     $('#clear-walls').click();
+                case 'i':
+                    $('#eyedropper').click();
+                    break;
             }
         });
     }
@@ -132,7 +133,6 @@ class ControlPanel {
         }.bind(this);
 
         $('.pause-button').click(function() {
-            // toggle pause
             this.setPaused(this.engine.running);
         }.bind(this));
 
@@ -194,7 +194,6 @@ class ControlPanel {
             }
             this.engine.env.reset(false);
             this.stats_panel.reset();
-            
         }.bind(this));
 
         $('#auto-reset').change(function() {
@@ -206,14 +205,14 @@ class ControlPanel {
         $('#clear-walls-reset').change(function() {
             WorldConfig.clear_walls_on_reset = this.checked;
         });
-        $('#reset-with-editor-org').click( () => {
+        $('#reset-with-editor-org').click(() => {
             let env = this.engine.env;
             if (!env.reset(true, false)) return;
             let center = env.grid_map.getCenter();
             let org = this.editor_controller.env.getCopyOfOrg();
             this.env_controller.dropOrganism(org, center[0], center[1])
         });
-        $('#save-env').click( () => {
+        $('#save-env').click(() => {
             let was_running = this.engine.running;
             this.setPaused(true);
             let env = this.engine.env.serialize();
@@ -269,7 +268,6 @@ class ControlPanel {
         $('#lifespan-multiplier').change(function() {
             Hyperparams.lifespanMultiplier = $('#lifespan-multiplier').val();
         }.bind(this));
-
         $('#rot-enabled').change(function() {
             Hyperparams.rotationEnabled = this.checked;
         });
@@ -291,8 +289,7 @@ class ControlPanel {
         $('#org-limit').change(function() {
             Hyperparams.maxOrganisms = parseInt($('#org-limit').val());
         });
-
-        $('#evolved-mutation').change( function() {
+        $('#evolved-mutation').change(function() {
             if (this.checked) {
                 $('.global-mutation-container').css('display', 'none');
                 $('#avg-mut').css('display', 'block');
@@ -303,10 +300,10 @@ class ControlPanel {
             }
             Hyperparams.useGlobalMutability = !this.checked;
         });
-        $('#global-mutation').change( function() {
+        $('#global-mutation').change(function() {
             Hyperparams.globalMutability = parseInt($('#global-mutation').val());
         });
-        $('.mut-prob').change( function() {
+        $('.mut-prob').change(function() {
             switch(this.id){
                 case "add-prob":
                     Hyperparams.addProb = this.value;
@@ -322,10 +319,10 @@ class ControlPanel {
             $('#change-prob').val(Math.floor(Hyperparams.changeProb));
             $('#remove-prob').val(Math.floor(Hyperparams.removeProb));
         });
-        $('#movers-produce').change( function() {
+        $('#movers-produce').change(function() {
             Hyperparams.moversCanProduce = this.checked;
         });
-        $('#food-blocks').change( function() {
+        $('#food-blocks').change(function() {
             Hyperparams.foodBlocksReproduction = this.checked;        
         });
         $('#reset-rules').click(() => {
@@ -349,7 +346,6 @@ class ControlPanel {
                 let result=JSON.parse(e.target.result);
                 Hyperparams.loadJsonObj(result);
                 this.updateHyperparamUIValues();
-                // have to clear the value so change() will be triggered if the same file is uploaded again
                 $('#upload-hyperparams')[0].value = '';
             };
             reader.readAsText(files[0]);
@@ -378,7 +374,6 @@ class ControlPanel {
         $('#look-range').val(Hyperparams.lookRange);
         $('#see-through-self').prop('checked', Hyperparams.seeThroughSelf);
         $('#global-mutation').val(Hyperparams.globalMutability);
-
         if (!Hyperparams.useGlobalMutability) {
             $('.global-mutation-container').css('display', 'none');
             $('#avg-mut').css('display', 'block');
@@ -391,7 +386,7 @@ class ControlPanel {
 
     defineModeControls() {
         var self = this;
-        $('.edit-mode-btn').click( function() {
+        $('.edit-mode-btn').click(function() {
             $('#cell-selections').css('display', 'none');
             $('#organism-options').css('display', 'none');
             self.editor_controller.setDetailsPanel();
@@ -422,47 +417,58 @@ class ControlPanel {
                     break;
                 case "drag-view":
                     self.setMode(Modes.Drag);
+                    break;
+                case "eyedropper":
+                    self.setMode(Modes.Eyedropper);
+                    break;
             }
             $('.edit-mode-btn').removeClass('selected');
             $('.'+this.id).addClass('selected');
         });
-        $('.reset-view').click( function(){
+        $('.reset-view').click(function(){
             this.env_controller.resetView();
         }.bind(this));
 
         var env = this.engine.env;
-        $('#reset-env').click( function() {
+        $('#reset-env').click(function() {
             env.reset();
             this.stats_panel.reset();
         }.bind(this));
-        $('#clear-env').click( () => {
+        $('#clear-env').click(() => {
             env.reset(true, false);
             this.stats_panel.reset();
         });
-        $('#brush-slider').on('input change', function () {
-            WorldConfig.brush_size = this.value;
+        $('#brush-slider').on('input change', function() {
+            WorldConfig.brush_size = parseInt(this.value);
+            $('#brush-number').val(this.value);
         });
-        $('#random-walls').click( function() {
+        $('#brush-number').on('input change', function() {
+            let value = Math.min(15, Math.max(0, parseInt(this.value) || 0));
+            WorldConfig.brush_size = value;
+            $('#brush-slider').val(value);
+            this.value = value;
+        });
+        $('#random-walls').click(function() {
             this.env_controller.randomizeWalls();
         }.bind(this));
-        $('#clear-walls').click( function() {
+        $('#clear-walls').click(function() {
             this.engine.env.clearWalls();
         }.bind(this));
-        $('#clear-editor').click( function() {
+        $('#clear-editor').click(function() {
             this.engine.organism_editor.setDefaultOrg();
             this.editor_controller.setEditorPanel();
         }.bind(this));
-        $('#generate-random').click( function() {
+        $('#generate-random').click(function() {
             this.engine.organism_editor.createRandom();
             this.editor_controller.refreshDetailsPanel();
         }.bind(this));
-        $('.reset-random').click( function() {
+        $('.reset-random').click(function() {
             this.engine.organism_editor.resetWithRandomOrgs(this.engine.env);
         }.bind(this));
 
-        window.onbeforeunload = function (e) {
+        window.onbeforeunload = function(e) {
             e = e || window.event;
-            let return_str = 'this will cause a confirmation on page close'
+            let return_str = 'this will cause a confirmation on page close';
             if (e) {
                 e.returnValue = return_str;
             }
@@ -478,7 +484,6 @@ class ControlPanel {
                 this.engine.stop();
         }
         else if (!paused) {
-            
             $('.pause-button').find("i").addClass("fa-pause");
             $('.pause-button').find("i").removeClass("fa-play");
             if (!this.engine.running)
@@ -489,11 +494,9 @@ class ControlPanel {
     setMode(mode) {
         this.env_controller.mode = mode;
         this.editor_controller.mode = mode;
-
         if (mode == Modes.Edit) {
             this.editor_controller.setEditorPanel();
         }
-
         if (mode == Modes.Clone) {
             this.env_controller.org_to_clone = this.engine.organism_editor.getCopyOfOrg();
         }
@@ -506,7 +509,7 @@ class ControlPanel {
     }
 
     changeEngineSpeed(change_val) {
-        this.engine.restart(change_val)
+        this.engine.restart(change_val);
         this.fps = this.engine.fps;
     }
 
@@ -524,7 +527,7 @@ class ControlPanel {
             this.opacity_change_rate = -this.opacity_change_rate;
         }
         this.headless_opacity = op;
-        $('#headless-notification').css('opacity',(op*100)+'%');
+        $('#headless-notification').css('opacity', (op*100)+'%');
     }
 
     update(delta_time) {
@@ -533,10 +536,7 @@ class ControlPanel {
         this.stats_panel.updateDetails();
         if (WorldConfig.headless)
             this.updateHeadlessIcon(delta_time);
-
     }
-
 }
-
 
 module.exports = ControlPanel;

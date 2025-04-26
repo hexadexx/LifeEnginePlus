@@ -14,9 +14,17 @@ class CellState {
         let r = parseInt(hex.substring(0, 2), 16);
         let g = parseInt(hex.substring(2, 4), 16);
         let b = parseInt(hex.substring(4, 6), 16);
-        r = Math.max(0, Math.floor(r * (1 - amount)));
-        g = Math.max(0, Math.floor(g * (1 - amount)));
-        b = Math.max(0, Math.floor(b * (1 - amount)));
+        
+        if (amount < 0) {
+            r = Math.min(255, Math.floor(r * (1 - amount)));
+            g = Math.min(255, Math.floor(g * (1 - amount)));
+            b = Math.min(255, Math.floor(b * (1 - amount)));
+        } else {
+            r = Math.max(0, Math.floor(r * (1 - amount)));
+            g = Math.max(0, Math.floor(g * (1 - amount)));
+            b = Math.max(0, Math.floor(b * (1 - amount)));
+        }
+        
         return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
     }
 }
@@ -27,6 +35,7 @@ class Empty extends CellState {
         super('empty');
     }
 }
+
 class Food extends CellState {
     constructor() {
         super('food');
@@ -35,13 +44,29 @@ class Food extends CellState {
     render(ctx, cell, size) {
         const depth = Math.min(cell.depth || 1, 3);
         let color;
+        let noiseAmount;
         switch (depth) {
-            case 1: color = this.color; break;
-            case 2: color = this.darkenColor(this.color, 0.15); break;
-            case 3: color = this.darkenColor(this.color, 0.3); break;
-            default: color = this.color;
+            case 1: 
+                color = this.color; 
+                noiseAmount = 0.2;
+                break;
+            case 2: 
+                color = this.darkenColor(this.color, -0.15); 
+                noiseAmount = 0.15;
+                break;
+            case 3: 
+                color = this.darkenColor(this.color, -0.3); 
+                noiseAmount = 0.1;
+                break;
+            default: 
+                color = this.color;
+                noiseAmount = 0.2;
         }
-        ctx.fillStyle = color;
+        const randomSeed = (cell.col * 1000 + cell.row) % 10000;
+        Math.seedrandom(randomSeed);
+        const darkenAmount = (Math.random() - 0.5) * noiseAmount;
+        const adjustedColor = this.darkenColor(color, darkenAmount);
+        ctx.fillStyle = adjustedColor;
         ctx.fillRect(cell.x, cell.y, size, size);
     }
 }
@@ -54,13 +79,29 @@ class Plant extends CellState {
     render(ctx, cell, size) {
         const depth = Math.min(cell.depth || 1, 3);
         let color;
+        let noiseAmount;
         switch (depth) {
-            case 1: color = this.color; break;
-            case 2: color = this.darkenColor(this.color, 0.15); break;
-            case 3: color = this.darkenColor(this.color, 0.3); break;
-            default: color = this.color;
+            case 1: 
+                color = this.color; 
+                noiseAmount = 0.2;
+                break;
+            case 2: 
+                color = this.darkenColor(this.color, -0.15); 
+                noiseAmount = 0.15;
+                break;
+            case 3: 
+                color = this.darkenColor(this.color, -0.3); 
+                noiseAmount = 0.1;
+                break;
+            default: 
+                color = this.color;
+                noiseAmount = 0.2;
         }
-        ctx.fillStyle = color;
+        const randomSeed = (cell.col * 1000 + cell.row) % 10000;
+        Math.seedrandom(randomSeed);
+        const darkenAmount = (Math.random() - 0.5) * noiseAmount;
+        const adjustedColor = this.darkenColor(color, darkenAmount);
+        ctx.fillStyle = adjustedColor;
         ctx.fillRect(cell.x, cell.y, size, size);
     }
 }
@@ -73,13 +114,29 @@ class Meat extends CellState {
     render(ctx, cell, size) {
         const depth = Math.min(cell.depth || 1, 3);
         let color;
+        let noiseAmount;
         switch (depth) {
-            case 1: color = this.color; break;
-            case 2: color = this.darkenColor(this.color, 0.15); break;
-            case 3: color = this.darkenColor(this.color, 0.3); break;
-            default: color = this.color;
+            case 1: 
+                color = this.color; 
+                noiseAmount = 0.2;
+                break;
+            case 2: 
+                color = this.darkenColor(this.color, -0.15); 
+                noiseAmount = 0.15;
+                break;
+            case 3: 
+                color = this.darkenColor(this.color, -0.3); 
+                noiseAmount = 0.1;
+                break;
+            default: 
+                color = this.color;
+                noiseAmount = 0.2;
         }
-        ctx.fillStyle = color;
+        const randomSeed = (cell.col * 1000 + cell.row) % 10000;
+        Math.seedrandom(randomSeed);
+        const darkenAmount = (Math.random() - 0.5) * noiseAmount;
+        const adjustedColor = this.darkenColor(color, darkenAmount);
+        ctx.fillStyle = adjustedColor;
         ctx.fillRect(cell.x, cell.y, size, size);
     }
 }
@@ -90,15 +147,14 @@ class Wall extends CellState {
     }
     
     render(ctx, cell, size) {
-        const depth = Math.min(cell.depth || 1, 3);
-        let color;
-        switch (depth) {
-            case 1: color = this.color; break;
-            case 2: color = this.darkenColor(this.color, 0.15); break;
-            case 3: color = this.darkenColor(this.color, 0.3); break;
-            default: color = this.color;
-        }
-        ctx.fillStyle = color;
+        const randomSeed = (cell.col * 1000 + cell.row) % 10000;
+        Math.seedrandom(randomSeed);
+        const darkenAmount = (Math.random() - 0.5) * 0.2;
+        
+        let baseColor = this.color;
+        const adjustedColor = this.darkenColor(baseColor, darkenAmount);
+        
+        ctx.fillStyle = adjustedColor;
         ctx.fillRect(cell.x, cell.y, size, size);
     }
 }
@@ -360,6 +416,11 @@ class RotationMover extends CellState {
     }
 }
 
+class Converter extends CellState {
+    constructor() {
+        super('converter');
+    }
+}
 
 const CellStates = {
     empty: new Empty(),
@@ -378,17 +439,18 @@ const CellStates = {
     armor: new Armor(),
     storage: new Storage(),
     eye: new Eye(),
+    converter: new Converter(),
     defineLists() {
         this.all = [
             this.empty, this.food, this.plant, this.meat, this.wall, 
             this.carnivoreMouth, this.herbivoreMouth, this.producer, 
             this.mover, this.leftRightMover, this.upDownMover, this.rotationMover,
-            this.killer, this.armor, this.storage, this.eye
+            this.killer, this.armor, this.storage, this.eye, this.converter
         ]
         this.living = [
             this.carnivoreMouth, this.herbivoreMouth, this.producer, 
             this.mover, this.leftRightMover, this.upDownMover, this.rotationMover,
-            this.killer, this.armor, this.storage, this.eye
+            this.killer, this.armor, this.storage, this.eye, this.converter
         ];
     },
     getRandomName: function() {

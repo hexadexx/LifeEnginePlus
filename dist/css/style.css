@@ -213,6 +213,9 @@ input:hover,input:active {
     display: flex;
     align-items: center;
 }
+#brush-number {
+    width: 50px;
+}
 #organism-options {
     display: none;
 }

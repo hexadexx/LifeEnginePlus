@@ -101,6 +101,9 @@ class EditorController extends CanvasController{
                 case "storage":
                     self.edit_cell_type = CellStates.storage;
                     break;
+                case "converter":
+                    self.edit_cell_type = CellStates.converter;
+                    break;
             }
             $(".cell-type" ).css("border-color", "black");
             var selected = '#'+this.id+'.cell-type';

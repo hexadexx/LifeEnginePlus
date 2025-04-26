@@ -2,13 +2,14 @@
 <html>
 	<head>
 		<meta charset="UTF-8">
-		<title>The Life Engine</title>
+		<title>Life Engine+</title>
 		<link rel="icon" href="./img/icon.png">
 		<link rel="stylesheet" href="./css/style.css">
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.2/css/all.min.css">
 		<script type="text/javascript" src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
 	</head>
 	<body>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/seedrandom/3.0.5/seedrandom.min.js"></script>
 		<script src="./js/bundle.js"></script>
 
 		<div id='env'>
@@ -23,6 +24,7 @@
 					<button class="edit-mode-btn food-drop selected" id="food-drop" title="Drop/Remove Food. Hotkey: F"><i class="fa fa-cutlery"></i></button>
 					<button class="edit-mode-btn meat-drop" id="meat-drop" title="Drop/Remove Meat"><i class="fa fa-drumstick-bite"></i></button>
 					<button class="edit-mode-btn plant-drop" id="plant-drop" title="Drop/Remove Plant"><i class="fa fa-leaf"></i></button>
+					<button class="edit-mode-btn eyedropper" id="eyedropper" title="Select cell type. Hotkey: I"><i class="fa fa-eyedropper"></i></button>
 					<button class="edit-mode-btn click-kill" id="click-kill" title="Click to kill. Hotkey: G"><i class="fa fa-skull"></i></button>
 				</div>
 				<img src="./img/title.png" alt="Life Engine">
@@ -37,6 +39,7 @@
 				<div id="brush-size-container">
 					<label id="brush-slider-label" for="brush-slider" title='Size of the brush for food, walls, and killing'><i class="fa fa-brush"></i> Brush Size </label>
 					<input id="brush-slider" type="range" min="0" max="15" value="2">
+					<input id="brush-number" type="number" min="0" max="15" value="2" title="Brush Size">
 				</div>
 			</div>
 
@@ -61,14 +64,24 @@
 							<div class='cell-legend-type' id='herbivoreMouth' title="Herbivore Mouth: Eats plant matter and generic food"></div>
 							<div class='cell-legend-type' id='producer' title="Producer: Produces plant food in adjacent cells"></div>
 							<div class='cell-legend-type' id='mover' title="Mover: Allows for movement and rotation"></div>
+							<div class='cell-legend-type' id='leftRightMover' title="Left-Right Mover: Moves primarily left and right"></div>
+							<div class='cell-legend-type' id='upDownMover' title="Up-Down Mover: Moves primarily up and down"></div>
+							<div class='cell-legend-type' id='rotationMover' title="Rotation Mover: Specializes in rotation"></div>
 							<div class='cell-legend-type' id='killer' title="Killer: Harms organisms in adjacent cells"></div>
 							<div class='cell-legend-type' id='armor' title="Armor: Negates effects of killer cells"></div>
 							<div class='cell-legend-type' id='eye' title="Eye: Observes cells and decides movement"></div>
 							<div class='cell-legend-type' id='storage' title="Storage: Stores food from adjacent cells"></div>
+							<div class='cell-legend-type' id='converter' title="Converter: Transforms nearby food based on adjacent mouth types"></div>
 							<div class='cell-legend-type' id='food' title="Food: Generic food that can be eaten by any mouth"></div>
 							<div class='cell-legend-type' id='plant' title="Plant: Created by producers, eaten by herbivores"></div>
 							<div class='cell-legend-type' id='meat' title="Meat: Created when organisms die, eaten by carnivores"></div>
 							<div class='cell-legend-type' id='wall' title="Wall: Blocks movement and reproduction"></div>
+							<div class='cell-legend-type' id='spore' title="Spore: Spawns spores on death that kill other creatures if contact is made, and reproduces"></div>
+							<div class='cell-legend-type' id='nose' title="Nose: Smells scent"></div>
+							<div class='cell-legend-type' id='scent' title="Scent: Attracts nose, overpowers other scents from cells like kill cell, unless eye sees the kill cell"></div>
+							<div class='cell-legend-type' id='sensor' title="Pheromone Sensor: Senses pheromones"></div>
+							<div class='cell-legend-type' id='goodPheremone' title="Attraction Pheromone: Attracts creatures with a sensor"></div>
+							<div class='cell-legend-type' id='badPheremone' title="Repellant Pheromone: Deters creatures with a sensor, especially after non-natural death for a short while"></div>
 						</div><br>
 					</div>
 					<div class='right-half'>
@@ -155,31 +168,69 @@
 													
 								<div class="cell-category" id="offensive-category" data-category="offensive" style="display:none;">
 									<div class="cell-type-container">
-									<div class='cell-type' id='killer' title="Killer: Harms organisms in adjacent cells">
-										<div class="cell-type-label">Killer</div>
+										<div class='cell-type' id='killer' title="Killer: Harms organisms in adjacent cells">
+											<div class="cell-type-label">Killer</div>
+										</div>
 									</div>
+									<div class="cell-type-container">
+										<div class='cell-type' id='spore' title="Spore: spawns spores on death that kill other creatures if contact is made, and reproduces">
+											<div class="cell-type-label">Spore placeholder</div>
+										</div>
 									</div>
 								</div>
-													
+								
 								<div class="cell-category" id="sensory-category" data-category="sensory" style="display:none;">
 									<div class="cell-type-container">
-									<div class='cell-type' id='eye' title="Eye: Looks for cells to move toward or away from. Click again to rotate">
-										<div class="cell-type-label">Eye</div>
+										<div class='cell-type' id='eye' title="Eye: Looks for cells to move toward or away from. Click again to rotate">
+											<div class="cell-type-label">Eye</div>
+										</div>
 									</div>
+									<div class="cell-type-container">
+										<div class='cell-type' id='nose' title="Nose: Smells scent">
+											<div class="cell-type-label">Nose placeholder</div>
+										</div>
+									</div>
+									<div class="cell-type-container">
+										<div class='cell-type' id='scent' title="Scent: Attracts nose, overpowers other scents from cells like kill cell, unless eye sees the kill cell">
+											<div class="cell-type-label">Scent placeholder</div>
+										</div>
+									</div>
+									<div class="cell-type-container">
+										<div class='cell-type' id='sensor' title="Pheremone Sensor: senses pheremones">
+											<div class="cell-type-label">Pheremone Sensor placeholder</div>
+										</div>
+									</div>
+									<div class="cell-type-container">
+										<div class='cell-type' id='goodPheremone' title="Attraction Pheremone: Attracts creatures with a sensor">
+											<div class="cell-type-label">Attraction Pheremone Emitter placeholder</div>
+										</div>
+									</div>
+									<div class="cell-type-container">
+										<div class='cell-type' id='badPheremone' title="Repellant Pheremone: Deters creatures with a sensor, especially after non-natural death for a short while">
+											<div class="cell-type-label">Repellant Pheremone Emitter placeholder</div>
+										</div>
 									</div>
 								</div>
 													
 								<div class="cell-category" id="resources-category" data-category="resources" style="display:none;">
 									<div class="cell-type-container">
-									<div class='cell-type' id='producer' title="Producer: Produces plant food in adjacent cells">
-										<div class="cell-type-label">Producer</div>
+										<div class='cell-type' id='producer' title="Producer: Produces plant food in adjacent cells">
+											<div class="cell-type-label">Producer</div>
+										</div>
 									</div>
+
+									<div class="cell-type-container">
+										<div class='cell-type' id='converter' title="Converter: Transforms nearby food based on adjacent mouth types">
+											<div class="cell-type-label">Converter</div>
+										</div>
 									</div>
-										<div class="cell-type-container">
+
+									<div class="cell-type-container">
 										<div class='cell-type' id='storage' title="Storage: Stores adjacent food with its type">
 											<div class="cell-type-label">Storage</div>
 										</div>
-										</div>
+									</div>
+
 									</div>
 								</div>
 								<div class="cell-type-buttons">
@@ -267,7 +318,7 @@
 						<button id='resize'>Resize and Reset</button>
 						<h3>Reset Options</h3>
 						<label for="auto-reset">Reset on total extinction</label>
-						<input type="checkbox" id="auto-reset" checked>
+						<input type="checkbox" id="auto-reset">
 						<p id='reset-count'>Auto reset count: </p>
 						<label for="auto-pause" title='Will override reset on extinction'>Pause on total extinction</label>
 						<input type="checkbox" id="auto-pause">
@@ -282,7 +333,7 @@
 						<button id="clear-walls" title="Clear All Walls. Hotkey: B">Clear all walls</button>
 						<br>
 						<label for="clear-walls-reset" title='When on, walls will be cleared when the environment resets'>Clear walls on reset</label>
-						<input type="checkbox" id="clear-walls-reset">
+						<input type="checkbox" id="clear-walls-reset" checked>
 						<br>
 						<button id='save-env' title="Download save file for entire world">Save World</button>
 						<label for="save-env-name" title='Save World as:'>Save As:</label>
@@ -400,7 +451,7 @@
 			<input id="upload-json" style="display: none;" type="file">
 		</div>
 		<div class='community-section'>
-			<button id="community-creations-btn" title="See worlds and organisms made by the community">Community Creations <i class="fa fa-users"></i></button>
+			<button id="original-game-btn" title="Original Life Engine">Original Game</button>
 		</div>
 		<div class='hot-controls'>
 			<button class="reset-view" title="Reset View. Hotkey: A"><i class="fa fa-video-camera"></i></button>
@@ -410,6 +461,7 @@
 			<button class="edit-mode-btn meat-drop" id="meat-drop" title="Drop/Remove Meat"><i class="fa fa-drumstick-bite"></i></button>
 			<button class="edit-mode-btn plant-drop" id="plant-drop" title="Drop/Remove Plant"><i class="fa fa-leaf"></i></button>
 			<button class="edit-mode-btn click-kill" id="click-kill" title="Click to kill. Hotkey: G"><i class="fa fa-skull"></i></button>
+			<button class="edit-mode-btn eyedropper" id="eyedropper" title="Select cell type. Hotkey: I"><i class="fa fa-eyedropper"></i></button>
 			<button class="headless" title="Toggle rendering. Hotkey: H"><i class="fa fa-eye-slash"></i></button>
 			<button class='pause-button' title="Play/Pause. Hotkey: Spacebar"><i class="fa fa-pause"></i></button>
 		</div>

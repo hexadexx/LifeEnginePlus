@@ -128,10 +128,14 @@ class WorldEnvironment extends Environment{
                 clearTimeout(this.depthUpdateTimeout);
             }
             
+            const totalCells = this.grid_map.cols * this.grid_map.rows;
+            const relativeSizeMultiplier = totalCells / 20000; 
+            const cooldown = Math.max(5, Math.min(50, Math.floor(10 * relativeSizeMultiplier)));
+            
             this.depthUpdateTimeout = setTimeout(() => {
                 this.updateDepths();
                 this.pendingDepthUpdate = false;
-            }, 10);
+            }, cooldown);
         }
     }
     
@@ -263,80 +267,9 @@ class WorldEnvironment extends Environment{
     }
 
     updateDepths() {
-        const targetStates = [CellStates.wall, CellStates.food, CellStates.plant, CellStates.meat];
-        
-        const cellGroups = {};
-        for (const stateType of targetStates) {
-            cellGroups[stateType.name] = [];
-        }
-        
-        for (let c = 0; c < this.grid_map.cols; c++) {
-            for (let r = 0; r < this.grid_map.rows; r++) {
-                const cell = this.grid_map.cellAt(c, r);
-                if (cell && targetStates.includes(cell.state)) {
-                    cellGroups[cell.state.name].push(cell);
-                    cell.depth = 0; 
-                }
-            }
-        }
-        
-        for (const stateType of targetStates) {
-            const cells = cellGroups[stateType.name];
-            if (cells.length === 0) continue;
-            
-            for (const cell of cells) {
-                if (cell.col === 0 || cell.row === 0 || 
-                    cell.col === this.grid_map.cols - 1 || 
-                    cell.row === this.grid_map.rows - 1) {
-                    cell.depth = 1;
-                    continue;
-                }
-                
-                let isEdge = false;
-                for (const loc of Neighbors.all) {
-                    const nc = cell.col + loc[0];
-                    const nr = cell.row + loc[1];
-                    const neighbor = this.grid_map.cellAt(nc, nr);
-                    
-                    if (!neighbor || neighbor.state !== cell.state) {
-                        isEdge = true;
-                        break;
-                    }
-                }
-                
-                if (isEdge) {
-                    cell.depth = 1;
-                }
-            }
-            
-            for (const cell of cells) {
-                if (cell.depth !== 0) continue;
-                
-                for (const loc of Neighbors.all) {
-                    const nc = cell.col + loc[0];
-                    const nr = cell.row + loc[1];
-                    const neighbor = this.grid_map.cellAt(nc, nr);
-                    
-                    if (neighbor && neighbor.state === cell.state && neighbor.depth === 1) {
-                        cell.depth = 2;
-                        break;
-                    }
-                }
-            }
-            
-            for (const cell of cells) {
-                if (cell.depth === 0) {
-                    cell.depth = 3;
-                }
-            }
-        }
-        
-        for (const stateType of targetStates) {
-            for (const cell of cellGroups[stateType.name]) {
-                this.renderer.addToRender(cell);
-            }
-        }
+        // too laggy, maybe fix soon
     }
+    
 }
 
 module.exports = WorldEnvironment;

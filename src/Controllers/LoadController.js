@@ -6,8 +6,8 @@ const LoadController = {
         $('#load-custom-btn').click(()=>{
             $('#upload-json').click();
         });
-        $('#community-creations-btn').click(()=>{
-            this.open();
+        $('#original-game-btn').click(()=>{
+            window.open('https://thelifeengine.net/', '_blank');
         });
         let panel = this;
         $(".load-panel").on('click', '.list-item', async function() {

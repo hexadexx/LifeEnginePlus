@@ -164,12 +164,61 @@ class EnvironmentController extends CanvasController{
                 case Modes.Drag:
                     this.dragScreen();
                     break;
+                case Modes.Eyedropper:
+                    if (left_click) {
+                        if (cell.owner) {
+                            $('#maximize').click();
+
+                            $('#editor.tabnav-item').click();
+                            
+                            $('#edit').click();
+
+                            const cellType = cell.state.name;
+                            $('.cell-category-btn').removeClass('active');
+                            
+                            const category = this.getCategoryForCellType(cellType);
+                            $(`.cell-category-btn[data-category="${category}"]`).click();
+                            
+                            $(`#${cellType}.cell-type`).click();
+                        } else if (cell.state === CellStates.empty) {
+                            return;
+                        } else {
+                            switch(cell.state) {
+                                case CellStates.food:
+                                    $('#food-drop').click();
+                                    break;
+                                case CellStates.meat:
+                                    $('#meat-drop').click();
+                                    break;
+                                case CellStates.plant:
+                                    $('#plant-drop').click();
+                                    break;
+                                case CellStates.wall:
+                                    $('#wall-drop').click();
+                                    break;
+                            }
+                        }
+                    }
+                    break;
             }
         }
-        else if (this.middle_click) {
-            //drag on middle click
+        
+        if (this.middle_click) {
             this.dragScreen();
         }
+    }
+
+
+    getCategoryForCellType(cellType) {
+        const cellElement = $(`#${cellType}.cell-type`);
+        
+        const categoryContainer = cellElement.closest('.cell-category');
+        
+        if (categoryContainer.length) {
+            return categoryContainer.data('category');
+        }
+        
+        return 'resources';
     }
 
     dragScreen() {
