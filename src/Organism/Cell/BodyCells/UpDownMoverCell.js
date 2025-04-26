@@ -9,7 +9,7 @@ class UpDownMoverCell extends BodyCell {
     }
     
     performFunction() {
-        if (this.org.anatomy.is_mover || (this.org.anatomy.is_ud_mover && this.org.anatomy.is_lr_mover)) return;
+        if (this.org.anatomy.is_mover) return;
         
         if (this.org.direction !== Directions.up && this.org.direction !== Directions.down) {
             this.org.direction = Math.random() < 0.5 ? Directions.up : Directions.down;
