@@ -326,15 +326,7 @@ class RotationMover extends CellState {
         }
     }
 }
-class Converter extends CellState {
-    constructor() {
-        super('converter');
-    }
-    render(ctx, cell, size) {
-        ctx.fillStyle = this.color;
-        ctx.fillRect(cell.x, cell.y, size, size);
-    }
-}
+
 
 const CellStates = {
     empty: new Empty(),
@@ -353,18 +345,17 @@ const CellStates = {
     armor: new Armor(),
     storage: new Storage(),
     eye: new Eye(),
-    converter: new Converter(),
     defineLists() {
         this.all = [
             this.empty, this.food, this.plant, this.meat, this.wall, 
             this.carnivoreMouth, this.herbivoreMouth, this.producer, 
             this.mover, this.leftRightMover, this.upDownMover, this.rotationMover,
-            this.killer, this.armor, this.storage, this.eye, this.converter
+            this.killer, this.armor, this.storage, this.eye
         ]
         this.living = [
             this.carnivoreMouth, this.herbivoreMouth, this.producer, 
             this.mover, this.leftRightMover, this.upDownMover, this.rotationMover,
-            this.killer, this.armor, this.storage, this.eye, this.converter
+            this.killer, this.armor, this.storage, this.eye
         ];
     },
     getRandomName: function() {

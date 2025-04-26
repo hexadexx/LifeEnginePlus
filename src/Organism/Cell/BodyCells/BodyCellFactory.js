@@ -9,7 +9,6 @@ const KillerCell = require("./KillerCell");
 const ArmorCell = require("./ArmorCell");
 const EyeCell = require("./EyeCell");
 const StorageCell = require("./StorageCell");
-const ConverterCell = require("./ConverterCell");
 const CellStates = require("../CellStates");
 
 const BodyCellFactory = {
@@ -26,7 +25,6 @@ const BodyCellFactory = {
         type_map[CellStates.armor.name] = ArmorCell;
         type_map[CellStates.eye.name] = EyeCell;
         type_map[CellStates.storage.name] = StorageCell;
-        type_map[CellStates.converter.name] = ConverterCell;
         this.type_map = type_map;
     },
 
