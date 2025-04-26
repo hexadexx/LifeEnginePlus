@@ -180,11 +180,21 @@ class ControlPanel {
                 $('.col-row-input').css('display' ,'block');
         });
 
+        
+        
         $('#resize').click(function() {
             if (!confirm('The current environment will be lost. Proceed?'))
                 return;
-            var cell_size = $('#cell-size').val();
+            var cell_size = parseFloat($('#cell-size').val());
             var fill_window = $('#fill-window').is(":checked");
+            var allow_float = $('#allow-float-cell-size').is(":checked");
+
+            // If float is not allowed, round to nearest integer
+            if (!allow_float) {
+                cell_size = Math.max(1, Math.round(cell_size));
+                $('#cell-size').val(cell_size);
+            }
+
             if (fill_window) {
                 this.engine.env.resizeFillWindow(cell_size);
             }
@@ -196,6 +206,14 @@ class ControlPanel {
             this.engine.env.reset(false);
             this.stats_panel.reset();
         }.bind(this));
+
+        $('#cell-size').on('change', function() {
+            var allow_float = $('#allow-float-cell-size').is(":checked");
+            if (!allow_float) {
+                var cell_size = parseFloat($(this).val());
+                $(this).val(Math.max(1, Math.round(cell_size)));
+            }
+        });
 
         $('#auto-reset').change(function() {
             WorldConfig.auto_reset = this.checked;
