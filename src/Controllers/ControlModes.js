@@ -7,6 +7,8 @@ const Modes = {
     Edit: 5,
     Clone: 6,
     Drag: 7,
+    MeatDrop: 8,
+    PlantDrop: 9,
 }
 
 module.exports = Modes;

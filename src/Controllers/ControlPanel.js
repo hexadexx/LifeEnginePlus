@@ -399,6 +399,12 @@ class ControlPanel {
                 case "food-drop":
                     self.setMode(Modes.FoodDrop);
                     break;
+                case "meat-drop":
+                    self.setMode(Modes.MeatDrop);
+                    break;
+                case "plant-drop":
+                    self.setMode(Modes.PlantDrop);
+                    break;
                 case "wall-drop":
                     self.setMode(Modes.WallDrop);
                     break;

@@ -19,8 +19,10 @@
 				<div class='vertical-buttons'>
 					<button class="reset-view" title="Reset View. Hotkey: A"><i class="fa fa-video-camera"></i></button>
 					<button class="edit-mode-btn drag-view" id="drag-view" title="Drag View. Hotkey: S"><i class="fa fa-arrows"></i></button>
-					<button class="edit-mode-btn wall-drop" id="wall-drop" title="Drop/Remove Wall. Hotkey: D"><i class="fa fa-th"></i></button>
+					<button class="edit-mode-btn wall-drop" id="wall-drop" title="Drop/Remove Wall. Hotkey: D"><i class="fa fa-trowel-bricks"></i></button>
 					<button class="edit-mode-btn food-drop selected" id="food-drop" title="Drop/Remove Food. Hotkey: F"><i class="fa fa-cutlery"></i></button>
+					<button class="edit-mode-btn meat-drop" id="meat-drop" title="Drop/Remove Meat"><i class="fa fa-drumstick-bite"></i></button>
+					<button class="edit-mode-btn plant-drop" id="plant-drop" title="Drop/Remove Plant"><i class="fa fa-leaf"></i></button>
 					<button class="edit-mode-btn click-kill" id="click-kill" title="Click to kill. Hotkey: G"><i class="fa fa-skull"></i></button>
 				</div>
 				<img src="./img/title.png" alt="Life Engine">
@@ -62,7 +64,7 @@
 							<div class='cell-legend-type' id='killer' title="Killer: Harms organisms in adjacent cells"></div>
 							<div class='cell-legend-type' id='armor' title="Armor: Negates effects of killer cells"></div>
 							<div class='cell-legend-type' id='eye' title="Eye: Observes cells and decides movement"></div>
-							<div class='cell-legend-type' id='storage' title="Storage: Stores adjacent food with its type"></div>
+							<div class='cell-legend-type' id='storage' title="Storage: Stores food from adjacent cells"></div>
 							<div class='cell-legend-type' id='food' title="Food: Generic food that can be eaten by any mouth"></div>
 							<div class='cell-legend-type' id='plant' title="Plant: Created by producers, eaten by herbivores"></div>
 							<div class='cell-legend-type' id='meat' title="Meat: Created when organisms die, eaten by carnivores"></div>
@@ -403,8 +405,10 @@
 		<div class='hot-controls'>
 			<button class="reset-view" title="Reset View. Hotkey: A"><i class="fa fa-video-camera"></i></button>
 			<button class="edit-mode-btn drag-view" id="drag-view" title="Drag View. Hotkey: S"><i class="fa fa-arrows"></i></button>
-			<button class="edit-mode-btn wall-drop" id="wall-drop" title="Drop/Remove Wall. Hotkey: D"><i class="fa fa-th"></i></button>
+			<button class="edit-mode-btn wall-drop" id="wall-drop" title="Drop/Remove Wall. Hotkey: D"><i class="fa fa-trowel-bricks"></i></button>
 			<button class="edit-mode-btn food-drop selected" id="food-drop" title="Drop/Remove Food. Hotkey: F"><i class="fa fa-cutlery"></i></button>
+			<button class="edit-mode-btn meat-drop" id="meat-drop" title="Drop/Remove Meat"><i class="fa fa-drumstick-bite"></i></button>
+			<button class="edit-mode-btn plant-drop" id="plant-drop" title="Drop/Remove Plant"><i class="fa fa-leaf"></i></button>
 			<button class="edit-mode-btn click-kill" id="click-kill" title="Click to kill. Hotkey: G"><i class="fa fa-skull"></i></button>
 			<button class="headless" title="Toggle rendering. Hotkey: H"><i class="fa fa-eye-slash"></i></button>
 			<button class='pause-button' title="Play/Pause. Hotkey: Spacebar"><i class="fa fa-pause"></i></button>
