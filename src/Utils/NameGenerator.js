@@ -6,7 +6,9 @@ const NameGenerator = {
         if (cellCount <= 8) return 2;
         if (cellCount <= 12) return 3;
         if (cellCount <= 21) return 4;
-        return 5;
+        if (cellCount <= 34) return 5;
+        if (cellCount <= 67) return 6;
+        return 7;
     },
     
     getCombinedNameProbability(cellCount) {
@@ -14,7 +16,25 @@ const NameGenerator = {
         if (cellCount <= 8) return 0.25;
         if (cellCount <= 12) return 0.28;
         if (cellCount <= 21) return 0.29;
-        return 0.3;
+        if (cellCount <= 34) return 0.35;
+        if (cellCount <= 52) return 0.68;
+        if (cellCount <= 67) return 0.72;
+        return 0.8;
+    },
+    
+    getCompoundWordProbability(cellCount, index) {
+        let baseProb = 0.5;
+        if (cellCount > 8) baseProb = 0.52;
+        if (cellCount > 12) baseProb = 0.55;
+        if (cellCount > 21) baseProb = 0.58;
+        
+        if (index > 0) baseProb -= 0.1;
+        
+        return baseProb;
+    },
+    
+    isVowel(char) {
+        return ['a', 'e', 'i', 'o', 'u'].includes(char.toLowerCase());
     },
     
     getRandomItem(array) {
@@ -29,18 +49,30 @@ const NameGenerator = {
         return this.getRandomItem(wordList);
     },
     
+    getNeutralName() {
+        return this.getRandomItem(NameList.neutral || ['unknown']);
+    },
+    
     createCombinedName(cellType1, cellType2) {
         const name1 = this.getNameForCellType(cellType1);
         const name2 = this.getNameForCellType(cellType2);
         
-        const halfPoint1 = Math.floor(name1.length / 2);
-        const halfPoint2 = Math.floor(name2.length / 2);
+        const vowels = ['a', 'e', 'i', 'o', 'u'];
         
-        return name1.substring(0, halfPoint1) + name2.substring(halfPoint2);
+        let breakPoint1 = Math.ceil(name1.length * 0.6);
+        while (breakPoint1 > 1 && vowels.includes(name1[breakPoint1 - 1].toLowerCase())) {
+            breakPoint1--;
+        }
+        
+        let breakPoint2 = Math.floor(name2.length * 0.4);
+        while (breakPoint2 < name2.length - 1 && !vowels.includes(name2[breakPoint2].toLowerCase())) {
+            breakPoint2++;
+        }
+        
+        return name1.substring(0, breakPoint1) + name2.substring(breakPoint2);
     },
-    
+
     generateName(anatomy, ancestor = null, useSpaces = true) {
-        // if the anatomy is undefined or null, return a random name
         if (!anatomy || !anatomy.cells || anatomy.cells.length === 0) {
             return Math.random().toString(36).substr(2, 10);
         }
@@ -60,54 +92,122 @@ const NameGenerator = {
             return Math.random().toString(36).substr(2, 10);
         }
         
+        const nameComponents = [];
+        const totalCells = anatomy.cells.length;
         const totalCellTypes = allCellTypes.length;
-        let topCellCount = Math.min(totalCellTypes, Math.max(2, Math.ceil(totalCellTypes * 0.75)));
         
+        let topCellCount = Math.min(totalCellTypes, Math.max(2, Math.ceil(totalCellTypes * 0.75)));
         const dominantTypes = allCellTypes.slice(0, topCellCount).map(([type]) => type);
         const remainingTypes = allCellTypes.slice(topCellCount).map(([type]) => type);
         
-        const totalCells = anatomy.cells.length;
         const componentCount = this.getNameComponentCount(totalCells);
-        const nameComponents = [];
-        
         const useCombinedNameComponent = Math.random() < this.getCombinedNameProbability(totalCells);
         
-        for (let i = 0; i < componentCount; i++) {
-            if (i === 0 && useCombinedNameComponent && dominantTypes.length > 0) {
-                const primaryType = this.getRandomItem(dominantTypes);
-                
-                let secondaryType;
-                if (remainingTypes.length > 0 && Math.random() > 0.5) {
-                    secondaryType = this.getRandomItem(remainingTypes);
-                } else {
-                    const otherDominantTypes = dominantTypes.filter(t => t !== primaryType);
-                    secondaryType = otherDominantTypes.length > 0 
-                        ? this.getRandomItem(otherDominantTypes) 
-                        : primaryType;
-                }
-                
-                nameComponents.push(this.createCombinedName(primaryType, secondaryType));
+        if (componentCount === 1) {
+            if (dominantTypes.length > 0) {
+                const cellType = dominantTypes[0];
+                const cellName = this.getNameForCellType(cellType);
+                const neutralName = this.getNeutralName();
+                nameComponents.push(this.createCombinedName(cellType, 'neutral'));
             } else {
-                nameComponents.push(this.getNameForCellType(this.getRandomItem(dominantTypes)));
+                nameComponents.push(this.getNeutralName());
+            }
+        } else {
+            for (let i = 0; i < componentCount; i++) {
+                if (i === 0 && useCombinedNameComponent && dominantTypes.length > 0) {
+                    const primaryType = this.getRandomItem(dominantTypes);
+                    
+                    let secondaryType;
+                    if (remainingTypes.length > 0 && Math.random() > 0.5) {
+                        secondaryType = this.getRandomItem(remainingTypes);
+                    } else {
+                        const otherDominantTypes = dominantTypes.filter(t => t !== primaryType);
+                        secondaryType = otherDominantTypes.length > 0 
+                            ? this.getRandomItem(otherDominantTypes) 
+                            : primaryType;
+                    }
+                    
+                    nameComponents.push(this.createCombinedName(primaryType, secondaryType));
+                } else {
+                    nameComponents.push(this.getNameForCellType(this.getRandomItem(dominantTypes)));
+                }
+            }
+            
+            if (componentCount >= 4) {
+                let compoundIndex = Math.floor(Math.random() * (componentCount - 1)) + 1;
+                nameComponents[compoundIndex] = this.createCombinedName(
+                    this.getRandomItem(dominantTypes), 
+                    this.getRandomItem(dominantTypes)
+                );
             }
         }
         
-        if (ancestor && ancestor.name && Math.random() > 0.6) {
+        if (ancestor && ancestor.name && nameComponents.length > 1) {
             const ancestorName = ancestor.name;
-            const ancestorParts = ancestorName.split(useSpaces ? ' ' : '');
+            const delimiter = useSpaces ? ' ' : '-';
+            const ancestorParts = ancestorName.split(delimiter);
             
-            if (ancestorParts.length > 0) {
-                const randomPart = this.getRandomItem(ancestorParts);
+            if (ancestorParts.length > 0 && Math.random() < 0.85) {
+                let inheritedPart;
+                const position = Math.random();
                 
-                if (Math.random() > 0.5) {
-                    nameComponents.push(randomPart);
+                if (position < 0.5 && ancestorParts.length > 0) {
+                    inheritedPart = ancestorParts[0];
+                    if (nameComponents.length > 0) {
+                        nameComponents[0] = inheritedPart;
+                    } else {
+                        nameComponents.push(inheritedPart);
+                    }
                 } else {
-                    nameComponents.unshift(randomPart);
+                    inheritedPart = ancestorParts[ancestorParts.length - 1];
+                    if (nameComponents.length > 0) {
+                        nameComponents[nameComponents.length - 1] = inheritedPart;
+                    } else {
+                        nameComponents.push(inheritedPart);
+                    }
                 }
             }
         }
         
-        return nameComponents.join(useSpaces ? ' ' : '');
+        if (nameComponents.length === 0) {
+            nameComponents.push(this.getNeutralName());
+        }
+        
+        const finalComponents = [];
+        for (let i = 0; i < nameComponents.length; i++) {
+            if (i === 0) {
+                finalComponents.push(nameComponents[i]);
+                continue;
+            }
+            
+            const prevWord = finalComponents[finalComponents.length - 1];
+            const currentWord = nameComponents[i];
+            
+            const lastCharPrev = prevWord[prevWord.length - 1];
+            const firstCharCurrent = currentWord[0];
+            
+            if (!this.isVowel(lastCharPrev) && this.isVowel(firstCharCurrent)) {
+                if (Math.random() < this.getCompoundWordProbability(totalCells, i - 1)) {
+                    finalComponents[finalComponents.length - 1] = prevWord + currentWord;
+                } else {
+                    finalComponents.push(currentWord);
+                }
+            } else {
+                finalComponents.push(currentWord);
+            }
+        }
+        
+        const joinedName = finalComponents.join(useSpaces ? ' ' : '-');
+        
+        return joinedName.split(' ')
+            .map((word, index) => {
+                if (index === 0) {
+                    return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+                } else {
+                    return word.toLowerCase();
+                }
+            })
+            .join(' ');
     }
 };
 

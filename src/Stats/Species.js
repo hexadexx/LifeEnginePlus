@@ -19,7 +19,7 @@ class Species {
         this.calcAnatomyDetails();
         
         this.name = anatomy ? 
-            NameGenerator.generateName(this, ancestor, true) : 
+            NameGenerator.generateName(anatomy, ancestor, true) : 
             Math.random().toString(36).substr(2, 10);
         
         this.extinct = false;

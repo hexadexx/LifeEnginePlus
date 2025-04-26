@@ -17,7 +17,7 @@ class EditorController extends CanvasController{
         this.defineEditorDetails();
         this.defineSaveLoad();
     }
-
+    
     mouseMove() {
         if (this.right_click || this.left_click)
             this.editOrganism();
@@ -33,7 +33,39 @@ class EditorController extends CanvasController{
         return this.env.organism.anatomy.getLocalCell(this.mouse_c-this.env.organism.c, this.mouse_r-this.env.organism.r);
     }
 
+    clearStorageCells(organism) {
+        if (!organism || !organism.anatomy || !organism.anatomy.cells) return;
+
+        for (let cell of organism.anatomy.cells) {
+            if (cell.state === CellStates.storage) {
+                cell.storedFood = null;
+            }
+        }
+    }
+    
     editOrganism() {
+        if (this.mode === Modes.Eyedropper) {
+            if (this.left_click) {
+                const loc_cell = this.getCurLocalCell();
+                if (loc_cell) {
+                    const cellType = loc_cell.state.name;
+                    $('.cell-category-btn').removeClass('active');
+
+                    $('#maximize').click();
+
+                    $('#editor.tabnav-item').click();
+                    
+                    $('#edit').click();
+                    
+                    const category = this.getCategoryForCellType(cellType);
+                    $(`.cell-category-btn[data-category="${category}"]`).click();
+                    
+                    $(`#${cellType}.cell-type`).click();
+                }
+            }
+            return;
+        }
+
         if (this.edit_cell_type == null || this.mode != Modes.Edit)
             return;
         if (this.left_click){
@@ -53,6 +85,18 @@ class EditorController extends CanvasController{
         this.updateDetails();
     }
 
+    getCategoryForCellType(cellType) {
+        const cellElement = $(`#${cellType}.cell-type`);
+        
+        const categoryContainer = cellElement.closest('.cell-category');
+        
+        if (categoryContainer.length) {
+            return categoryContainer.data('category');
+        }
+        
+        return 'resources';
+    }
+    
     updateDetails() {
         $('.species-name').text("Species name: "+this.env.organism.species.name);
         $('.cell-count').text("Cell count: "+this.env.organism.anatomy.cells.length);
@@ -221,6 +265,7 @@ class EditorController extends CanvasController{
         this.env.organism.loadRaw(org);
         
         this.convertMouthCells(this.env.organism);
+        this.clearStorageCells(this.env.organism);
         
         this.refreshDetailsPanel();
         this.env.organism.updateGrid();

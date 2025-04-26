@@ -59,17 +59,24 @@ class EnvironmentController extends CanvasController{
     */
     randomizeWalls(thickness=1) {
         this.env.clearWalls();
+        
         const noise_threshold = -0.017;
-        let avg_noise = 0;
-        let resolution = 20;
+        const resolution = 20;
         Perlin.seed();
-
-        for (let r = 0; r < this.env.num_rows; r++) {
-            for (let c = 0; c < this.env.num_cols; c++) {
-                let xval = c/this.env.num_cols*(resolution/this.env.renderer.cell_size*(this.env.num_cols/this.env.num_rows));
-                let yval = r/this.env.num_rows*(resolution/this.env.renderer.cell_size*(this.env.num_rows/this.env.num_cols));
+        
+        const totalCells = this.env.num_rows * this.env.num_cols;
+        const chunkSize = 4250;
+        
+        const processChunk = (startIdx, endIdx) => {
+            for (let idx = startIdx; idx < endIdx && idx < totalCells; idx++) {
+                const r = Math.floor(idx / this.env.num_cols);
+                const c = idx % this.env.num_cols;
+                
+                let xval = c/this.env.num_cols*resolution;
+                let yval = r/this.env.num_rows*resolution;
+                
                 let noise = Perlin.get(xval, yval);
-                avg_noise += noise/(this.env.num_rows*this.env.num_cols);
+                
                 if (noise > noise_threshold && noise < noise_threshold + thickness/resolution) {
                     let cell = this.env.grid_map.cellAt(c, r);
                     if (cell != null) {
@@ -78,7 +85,22 @@ class EnvironmentController extends CanvasController{
                     }
                 }
             }
-        }
+        };
+        
+        const processAllChunks = (currentChunk = 0) => {
+            const startIdx = currentChunk * chunkSize;
+            const endIdx = startIdx + chunkSize;
+            
+            processChunk(startIdx, endIdx);
+            
+            if (endIdx < totalCells) {
+                setTimeout(() => {
+                    processAllChunks(currentChunk + 1);
+                }, 10); 
+            }
+        };
+        
+        processAllChunks();
     }
 
     updateMouseLocation(offsetX, offsetY){

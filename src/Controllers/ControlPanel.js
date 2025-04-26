@@ -3,6 +3,7 @@ const Modes = require("./ControlModes");
 const StatsPanel = require("../Stats/StatsPanel");
 const WorldConfig = require("../WorldConfig");
 const LoadController = require("./LoadController");
+const CellStates = require("../Organism/Cell/CellStates");
 
 class ControlPanel {
     constructor(engine) {
@@ -503,6 +504,14 @@ class ControlPanel {
     }
 
     setEditorOrganism(org) {
+        if (org.anatomy && org.anatomy.cells) {
+            for (let cell of org.anatomy.cells) {
+                if (cell.state === CellStates.storage) {
+                    cell.storedFood = null;
+                }
+            }
+        }
+    
         this.engine.organism_editor.setOrganismToCopyOf(org);
         this.editor_controller.clearDetailsPanel();
         this.editor_controller.setDetailsPanel();
