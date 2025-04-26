@@ -41,9 +41,6 @@ const LoadController = {
 
         });
         
-        this.loadList('worlds');
-        this.loadList('organisms');
-        this.loadList('mods');
     },
 
     async loadList(name) {
