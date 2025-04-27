@@ -3,7 +3,7 @@ const SpeciesChart = require("./Charts/SpeciesChart");
 const MutationChart = require("./Charts/MutationChart");
 const CellsChart = require("./Charts/CellsChart");
 const FossilRecord = require("./FossilRecord");
-const SpeciesTreeChart = require("./SpeciesTreeChart");
+
 
 const ChartSelections = [PopulationChart, SpeciesChart, CellsChart, MutationChart];
 
@@ -13,12 +13,7 @@ class StatsPanel {
         this.chart_selection = 0;
         this.setChart();
         this.env = env;
-        this.last_reset_count = env.reset_count;
-        this.initializeSpeciesTree();
-    }
-
-    initializeSpeciesTree() {
-        this.speciesTreeChart = new SpeciesTreeChart();
+        this.last_reset_count=env.reset_count;
     }
 
     setChart(selection=this.chart_selection) {
@@ -37,7 +32,7 @@ class StatsPanel {
     }
 
     defineControls() {
-        $('#chart-option').change(function() {
+        $('#chart-option').change ( function() {
             this.chart_selection = $("#chart-option")[0].selectedIndex;
             this.setChart();
         }.bind(this));
@@ -45,7 +40,7 @@ class StatsPanel {
 
     updateChart() {
         if (this.last_reset_count < this.env.reset_count){
-            this.reset();
+            this.reset()
         }
         this.last_reset_count = this.env.reset_count;
         this.chart_controller.updateData();
@@ -68,6 +63,7 @@ class StatsPanel {
     reset() {
         this.setChart();
     }
+    
 }
 
 module.exports = StatsPanel;

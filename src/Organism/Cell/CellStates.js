@@ -113,7 +113,7 @@ class Meat extends CellState {
     
     render(ctx, cell, size) {
         const rotTime = cell.rotTime || 0;
-        const maxRotTime = 5000;
+        const maxRotTime = 10000;
         
         let colorFactor = Math.min(rotTime / maxRotTime, 1);
         

@@ -87,7 +87,7 @@ class WorldEnvironment extends Environment{
                     cell.rotTime += 10; 
                 }
                 
-                if (cell.rotTime >= 5000) {
+                if (cell.rotTime >= 10000) {
                     this.cellsToProcess.push({
                         col: cell.col,
                         row: cell.row,
