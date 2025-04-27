@@ -423,6 +423,9 @@
 							<option value="mut-rate">Mutation Rate</option>
 						</select>
 						<p id='chart-note'></p>
+						<div id="tree-button-container" style="margin-top: 10px;">
+							<button id="show-tree-btn"><i class="fa fa-tree"></i> Show Species Tree</button>
+						</div>						
 					</div>
 					<div class='right-half'>
 						<div id="chartContainer"></div>
@@ -478,6 +481,22 @@
 		<div id='maximize-hot-control' class='hot-controls'>
 			<button id="maximize" title="Show Control Panel."><i class="fa fa-plus-square"></i></button>
 		</div>
-		
+		<div id="tree-overlay" class="tree-overlay">
+			<div class="tree-container">
+				<div class="tree-header">
+					<h2>Species Phylogenetic Tree</h2>
+					<div>
+						<button id="refresh-tree-btn" class="refresh-tree-btn">↻ Refresh</button>
+						<button id="close-tree-btn" class="close-tree-btn">×</button>
+					</div>
+				</div>
+				<div id="tree-visualization"></div>
+				<div id="species-details" class="species-details">
+					<div class="details-content">
+						<h3>Click on a species to view details</h3>
+					</div>
+				</div>
+			</div>
+		</div>
 	</body>
 </html>
