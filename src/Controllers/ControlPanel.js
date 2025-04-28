@@ -173,6 +173,14 @@ class ControlPanel {
     }
 
     defineWorldControls() {
+        $('#show-pheromones').change(function() {
+            Hyperparams.showPheromones = this.checked;
+            if (this.checked) {
+                this.engine.env.renderFull();
+            }
+        }.bind(this));
+        
+
         $('#fill-window').change(function() {
             if (this.checked)
                 $('.col-row-input').css('display' ,'none');
@@ -377,6 +385,7 @@ class ControlPanel {
     }
 
     updateHyperparamUIValues(){
+        $('#show-pheromones').prop('checked', Hyperparams.showPheromones);
         $('#food-prod-prob').val(Hyperparams.foodProdProb);
         $('#lifespan-multiplier').val(Hyperparams.lifespanMultiplier);
         $('#rot-enabled').prop('checked', Hyperparams.rotationEnabled);

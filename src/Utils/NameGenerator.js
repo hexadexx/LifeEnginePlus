@@ -49,10 +49,7 @@ const NameGenerator = {
         return this.getRandomItem(NameList.neutral || ['unknown']);
     },
     
-    createCombinedName(cellType1, cellType2) {
-        const name1 = this.getNameForCellType(cellType1);
-        const name2 = this.getNameForCellType(cellType2);
-        
+    createCombinedName(name1, name2) {
         const vowels = ['a', 'e', 'i', 'o', 'u'];
         
         let breakPoint1 = Math.ceil(name1.length * 0.6);
@@ -115,7 +112,10 @@ const NameGenerator = {
                         : primaryType;
                 }
                 
-                nameComponents.push(this.createCombinedName(primaryType, secondaryType));
+                nameComponents.push(this.createCombinedName(
+                    this.getNameForCellType(primaryType), 
+                    this.getNameForCellType(secondaryType)
+                ));
             } else {
                 nameComponents.push(this.getNameForCellType(this.getRandomItem(dominantTypes)));
             }
@@ -137,39 +137,45 @@ const NameGenerator = {
             }
         }
         
-        if (ancestor && ancestor.name && nameComponents.length > 1) {
+        if (ancestor && ancestor.name) {
             const ancestorName = ancestor.name;
-            const delimiter = useSpaces ? ' ' : '-';
-            const ancestorParts = ancestorName.split(delimiter);
+            const ancestorParts = ancestorName.split(/[\s-]/);
             
-            if (ancestorParts.length > 0 && Math.random() < 0.85) {
-                let inheritedPart;
-                const position = Math.random();
+            if (ancestorParts.length === 1) {
+                const ancestorWord = ancestorParts[0];
+                const extractLength = Math.min(4, Math.round(ancestorWord.length / 0.75));
+                const extractedPart = Math.random() < 0.5 
+                    ? ancestorWord.substring(0, extractLength)
+                    : ancestorWord.substring(ancestorWord.length - extractLength);
                 
-                if (position < 0.5 && ancestorParts.length > 0) {
-                    inheritedPart = ancestorParts[0];
-                    if (nameComponents.length > 0) {
-                        nameComponents[0] = inheritedPart;
+                if (Math.random() < 0.7) {
+                    const randomType = this.getRandomItem(dominantTypes);
+                    const randomName = this.getNameForCellType(randomType);
+                    
+                    if (Math.random() < 0.5) {
+                        nameComponents[0] = this.createCombinedName(extractedPart, randomName);
                     } else {
-                        nameComponents.push(inheritedPart);
+                        nameComponents[0] = this.createCombinedName(randomName, extractedPart);
                     }
-                } else {
-                    inheritedPart = ancestorParts[ancestorParts.length - 1];
-                    if (nameComponents.length > 0) {
-                        nameComponents[nameComponents.length - 1] = inheritedPart;
+                }
+                
+                if (Math.random() < 0.3) {
+                    const neutralName = this.getNeutralName();
+                    if (Math.random() < 0.5) {
+                        nameComponents[0] = this.createCombinedName(extractedPart, neutralName);
                     } else {
-                        nameComponents.push(inheritedPart);
+                        nameComponents[0] = this.createCombinedName(neutralName, extractedPart);
                     }
                 }
             }
         }
         
-        const finalComponents = nameComponents.slice(0, 3);
-        
-        if (finalComponents.length === 0) {
-            finalComponents.push(this.getNeutralName());
+        if (nameComponents.length === 0) {
+            const randomType = this.getRandomItem(dominantTypes);
+            nameComponents.push(this.getNameForCellType(randomType));
         }
         
+        const finalComponents = nameComponents.slice(0, 3);
         const finalWord = finalComponents.join(useSpaces ? ' ' : '-');
         
         return finalWord.split(' ')

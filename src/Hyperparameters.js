@@ -29,6 +29,8 @@ const Hyperparams = {
         this.extraMoverFoodCost = 0;
 
         this.maxOrganisms = -1;
+        
+        this.showPheromones = true;
     },
 
     loadJsonObj(obj) {

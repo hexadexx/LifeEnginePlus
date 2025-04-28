@@ -1,6 +1,7 @@
 // const CellTypes = require("../Organism/Cell/CellTypes");
 const CellStates = require("../Organism/Cell/CellStates");
 const Directions = require("../Organism/Directions");
+const Hyperparams = require("../Hyperparameters");
 
 // Renderer controls access to a canvas. There is one renderer for each canvas
 class Renderer {
@@ -48,6 +49,25 @@ class Renderer {
     }
 
     renderCell(cell) {
+        if (Hyperparams.showPheromones) {
+            // Render pheromones underneath
+            if (cell.redPheromone > 0 || cell.greenPheromone > 0 || cell.bluePheromone > 0) {
+                const r = Math.min(255, Math.floor(cell.redPheromone > 0 ? 255 : 0));
+                const g = Math.min(255, Math.floor(cell.greenPheromone > 0 ? 255 : 0));
+                const b = Math.min(255, Math.floor(cell.bluePheromone > 0 ? 255 : 0));
+                
+                const PHEROMONE_MAX = 5;
+                const remainingFrames = Math.max(cell.redPheromone, cell.greenPheromone, cell.bluePheromone);
+                const fadeRatio = remainingFrames / PHEROMONE_MAX;
+                
+                const opacity = fadeRatio * 0.3;
+                
+                this.ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${opacity})`;
+                this.ctx.fillRect(cell.x, cell.y, this.cell_size, this.cell_size);
+            }
+        }
+        
+        // Then render the cell
         cell.state.render(this.ctx, cell, this.cell_size);
     }
 

@@ -29,6 +29,7 @@ class WorldEnvironment extends Environment{
         this.data_update_rate = 100;
         this.pendingDepthUpdate = false;
         this.depthUpdateTimeout = null;
+        Hyperparams.showPheromones = true;
         FossilRecord.setEnv(this);
         this.updateDepths();
     }
@@ -42,6 +43,8 @@ class WorldEnvironment extends Environment{
             }
         }
         this.removeOrganisms(to_remove);
+        
+        this.updatePheromones();
         
         this.rotUpdateFrame++;
         if (this.rotUpdateFrame % 10 !== 0) {
@@ -87,7 +90,7 @@ class WorldEnvironment extends Environment{
                     cell.rotTime += 10; 
                 }
                 
-                if (cell.rotTime >= 10000) {
+                if (cell.rotTime >= 5000) {
                     this.cellsToProcess.push({
                         col: cell.col,
                         row: cell.row,
@@ -179,6 +182,68 @@ class WorldEnvironment extends Environment{
         if (this.total_ticks % this.data_update_rate == 0) {
             FossilRecord.updateData();
         }
+    }
+
+    updatePheromones() {
+        if (!Hyperparams.showPheromones) return;
+        
+        for (let col of this.grid_map.grid) {
+            for (let cell of col) {
+                if (cell.redPheromone > 0) {
+                    cell.redPheromone--;
+                    this.renderer.addToRender(cell);
+                }
+                if (cell.greenPheromone > 0) {
+                    cell.greenPheromone--;
+                    this.renderer.addToRender(cell);
+                }
+                if (cell.bluePheromone > 0) {
+                    cell.bluePheromone--;
+                    this.renderer.addToRender(cell);
+                }
+            }
+        }
+        
+        for (let org of this.organisms) {
+            for (let bodyCell of org.anatomy.cells) {
+                const realCell = org.getRealCell(bodyCell);
+                if (!realCell) continue;
+                
+                const neighbors = this.getNeighborCells(realCell.col, realCell.row);
+                
+                if (bodyCell.state === CellStates.killer) {
+                    for (let neighbor of neighbors) {
+                        neighbor.redPheromone = 25
+                        this.renderer.addToRender(neighbor);
+                    }
+                } else if (bodyCell.state === CellStates.producer) {
+                    for (let neighbor of neighbors) {
+                        neighbor.greenPheromone = 25
+                        this.renderer.addToRender(neighbor);
+                    }
+                } else if (bodyCell.state === CellStates.armor) {
+                    for (let neighbor of neighbors) {
+                        neighbor.bluePheromone = 25
+                        this.renderer.addToRender(neighbor);
+                    }
+                }
+            }
+        }
+    }
+
+    getNeighborCells(col, row) {
+        const neighbors = [];
+        for (let dx = -1; dx <= 1; dx++) {
+            for (let dy = -1; dy <= 1; dy++) {
+                if (dx === 0 && dy === 0) continue;
+                
+                const neighborCell = this.grid_map.cellAt(col + dx, row + dy);
+                if (neighborCell) {
+                    neighbors.push(neighborCell);
+                }
+            }
+        }
+        return neighbors;
     }
 
     render() {
@@ -408,4 +473,3 @@ class WorldEnvironment extends Environment{
 }
 
 module.exports = WorldEnvironment;
-

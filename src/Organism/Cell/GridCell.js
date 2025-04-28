@@ -11,6 +11,9 @@ class Cell{
         this.row = row;
         this.x = x;
         this.y = y;
+        this.redPheromone = 0;
+        this.greenPheromone = 0;
+        this.bluePheromone = 0;
     }
 
     setType(state) {
