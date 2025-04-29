@@ -126,8 +126,10 @@ class Organism {
             else {
                 org.species.addPop();
             }
+            this.food_collected = Math.max(this.food_collected - this.foodNeeded(), 0);
+            return true;
         }
-        Math.max(this.food_collected -= this.foodNeeded(), 0);
+        return false;
     }
 
     mutate() {
@@ -306,14 +308,40 @@ class Organism {
             this.reproduce();
         }
         
+        const producers = [];
+        const mouths = [];
+        const otherCells = [];
+        
         for (var cell of this.anatomy.cells) {
-            cell.performFunction();
-            if (!this.living)
-                return this.living;
+            if (cell.state === CellStates.producer) {
+                producers.push(cell);
+            } else if (cell.state === CellStates.herbivoreMouth || 
+                       cell.state === CellStates.carnivoreMouth || 
+                       cell.state === CellStates.omnivoreMouth) {
+                mouths.push(cell);
+            } else {
+                otherCells.push(cell);
+            }
         }
         
+        for (var cell of producers) {
+            cell.performFunction();
+            if (!this.living) return this.living;
+        }
+        
+        for (var cell of mouths) {
+            cell.performFunction();
+            if (!this.living) return this.living;
+        }
+        
+        for (var cell of otherCells) {
+            cell.performFunction();
+            if (!this.living) return this.living;
+        }
+        
+        this.move_count++;
+        
         if (this.anatomy.is_mover || this.anatomy.is_ud_mover || this.anatomy.is_lr_mover) {
-            this.move_count++;
             var changed_dir = false;
             
             if (this.ignore_brain_for == 0) {
@@ -343,29 +371,25 @@ class Organism {
             }
             
             if ((this.move_count > this.move_range && !changed_dir) || !moved) {
-                var rotated = false;
+                let newDirection;
                 
-                if (this.anatomy.is_rotation_mover || this.anatomy.is_mover) {
-                    rotated = this.attemptRotate();
+                if (this.anatomy.is_ud_mover && !this.anatomy.is_lr_mover) {
+                    newDirection = this.direction === Directions.up ? Directions.down : Directions.up;
+                } else if (this.anatomy.is_lr_mover && !this.anatomy.is_ud_mover) {
+                    newDirection = this.direction === Directions.left ? Directions.right : Directions.left;
+                } else {
+                    newDirection = Directions.getRandomDirection();
                 }
                 
-                if (!rotated) {
-                    let newDirection;
-                    
-                    if (this.anatomy.is_ud_mover && !this.anatomy.is_lr_mover) {
-                        newDirection = this.direction === Directions.up ? Directions.down : Directions.up;
-                    } else if (this.anatomy.is_lr_mover && !this.anatomy.is_ud_mover) {
-                        newDirection = this.direction === Directions.left ? Directions.right : Directions.left;
-                    } else {
-                        newDirection = Directions.getRandomDirection();
-                    }
-                    
-                    this.changeDirection(newDirection);
-                    
-                    if (changed_dir)
-                        this.ignore_brain_for = this.move_range + 1;
-                }
+                this.changeDirection(newDirection);
+                
+                if (changed_dir)
+                    this.ignore_brain_for = this.move_range + 1;
             }
+        }
+
+        if (this.anatomy.is_rotation_mover || this.anatomy.is_mover) {
+            this.attemptRotate();
         }
         
         return this.living;
