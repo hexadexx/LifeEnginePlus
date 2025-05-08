@@ -1,9 +1,7 @@
-// const CellTypes = require("../Organism/Cell/CellTypes");
 const CellStates = require("../Organism/Cell/CellStates");
 const Directions = require("../Organism/Directions");
 const Hyperparams = require("../Hyperparameters");
 
-// Renderer controls access to a canvas. There is one renderer for each canvas
 class Renderer {
     constructor(canvas_id, container_id, cell_size) {
         this.cell_size = cell_size;
@@ -15,6 +13,8 @@ class Renderer {
         this.cells_to_render = new Set();
         this.cells_to_highlight = new Set();
         this.highlighted_cells = new Set();
+        this.cells_with_pheromones = new Set();
+        this.cells_with_rot = new Set();
     }
 
     fillWindow(container_id) {
@@ -49,26 +49,44 @@ class Renderer {
     }
 
     renderCell(cell) {
-        if (Hyperparams.showPheromones) {
-            // Render pheromones underneath
-            if (cell.redPheromone > 0 || cell.greenPheromone > 0 || cell.bluePheromone > 0) {
-                const r = Math.min(255, Math.floor(cell.redPheromone > 0 ? 255 : 0));
-                const g = Math.min(255, Math.floor(cell.greenPheromone > 0 ? 255 : 0));
-                const b = Math.min(255, Math.floor(cell.bluePheromone > 0 ? 255 : 0));
-                
-                const PHEROMONE_MAX = 5;
-                const remainingFrames = Math.max(cell.redPheromone, cell.greenPheromone, cell.bluePheromone);
-                const fadeRatio = remainingFrames / PHEROMONE_MAX;
-                
-                const opacity = fadeRatio * 0.3;
-                
-                this.ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${opacity})`;
-                this.ctx.fillRect(cell.x, cell.y, this.cell_size, this.cell_size);
-            }
+        cell.state.render(this.ctx, cell, this.cell_size);
+        
+        if (Hyperparams.showPheromones && 
+            (cell.redPheromone > 0 || cell.greenPheromone > 0 || cell.bluePheromone > 0)) {
+            this.renderPheromone(cell);
+            this.cells_with_pheromones.add(cell);
         }
         
-        // Then render the cell
-        cell.state.render(this.ctx, cell, this.cell_size);
+        if (cell.state === CellStates.meat && cell.rotTime > 0) {
+            this.renderRotLayer(cell);
+            this.cells_with_rot.add(cell);
+        }
+    }
+    
+    renderPheromone(cell) {
+        const r = cell.redPheromone > 0 ? 255 : 0;
+        const g = cell.greenPheromone > 0 ? 255 : 0;
+        const b = cell.bluePheromone > 0 ? 255 : 0;
+        
+        const intensity = Math.max(cell.redPheromone, cell.greenPheromone, cell.bluePheromone);
+        const opacity = intensity / 30 * 0.25;
+        
+        this.ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${opacity})`;
+        this.ctx.fillRect(cell.x, cell.y, this.cell_size, this.cell_size);
+    }
+    
+    renderRotLayer(cell) {
+        const maxRotTime = 5000;
+        const rotProgress = Math.min(cell.rotTime / maxRotTime, 1);
+        
+        const r = 84; 
+        const g = 60;
+        const b = 64;
+        
+        const opacity = rotProgress * 0.6;
+        
+        this.ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${opacity})`;
+        this.ctx.fillRect(cell.x, cell.y, this.cell_size, this.cell_size);
     }
 
     renderOrganism(org) {
@@ -83,6 +101,15 @@ class Renderer {
             this.cells_to_highlight.add(cell);
         }
         this.cells_to_render.add(cell);
+        
+        if (Hyperparams.showPheromones && 
+            (cell.redPheromone > 0 || cell.greenPheromone > 0 || cell.bluePheromone > 0)) {
+            this.cells_with_pheromones.add(cell);
+        }
+        
+        if (cell.state === CellStates.meat && cell.rotTime > 0) {
+            this.cells_with_rot.add(cell);
+        }
     }
 
     renderHighlights() {
@@ -91,7 +118,6 @@ class Renderer {
             this.highlighted_cells.add(cell);
         }
         this.cells_to_highlight.clear();
-        
     }
 
     highlightOrganism(org) {

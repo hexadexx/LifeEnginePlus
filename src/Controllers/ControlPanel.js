@@ -289,6 +289,12 @@ class ControlPanel {
     }
 
     defineHyperparameterControls() {
+        $('#meat-rot-speed').change(function() {
+            Hyperparams.meatRotSpeed = parseFloat($('#meat-rot-speed').val());
+        });
+        $('#plant-wilt-speed').change(function() {
+            Hyperparams.plantWiltSpeed = parseFloat($('#plant-wilt-speed').val());
+        });        
         $('#food-prod-prob').change(function() {
             Hyperparams.foodProdProb = $('#food-prod-prob').val();
         }.bind(this));
@@ -385,6 +391,8 @@ class ControlPanel {
     }
 
     updateHyperparamUIValues(){
+        $('#meat-rot-speed').val(Hyperparams.meatRotSpeed);
+        $('#plant-wilt-speed').val(Hyperparams.plantWiltSpeed);
         $('#show-pheromones').prop('checked', Hyperparams.showPheromones);
         $('#food-prod-prob').val(Hyperparams.foodProdProb);
         $('#lifespan-multiplier').val(Hyperparams.lifespanMultiplier);

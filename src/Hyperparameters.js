@@ -31,6 +31,9 @@ const Hyperparams = {
         this.maxOrganisms = -1;
         
         this.showPheromones = true;
+        
+        this.meatRotSpeed = 1.0;
+        this.plantWiltSpeed = 1.0;
     },
 
     loadJsonObj(obj) {

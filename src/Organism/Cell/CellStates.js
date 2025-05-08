@@ -9,21 +9,6 @@ class CellState {
     render(ctx, cell, size) {
         ctx.fillStyle = this.color;
         ctx.fillRect(cell.x, cell.y, size, size);
-        
-        if (Hyperparams.showPheromones && (cell.redPheromone > 0 || cell.greenPheromone > 0 || cell.bluePheromone > 0)) {
-            const r = Math.min(255, Math.floor(cell.redPheromone > 0 ? 255 : 0));
-            const g = Math.min(255, Math.floor(cell.greenPheromone > 0 ? 255 : 0));
-            const b = Math.min(255, Math.floor(cell.bluePheromone > 0 ? 255 : 0));
-            
-            const maxFrames = 30;
-            const remainingFrames = Math.max(cell.redPheromone, cell.greenPheromone, cell.bluePheromone);
-            const fadeRatio = remainingFrames / maxFrames;
-            
-            const opacity = fadeRatio * 0.275;
-            
-            ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${opacity})`;
-            ctx.fillRect(cell.x, cell.y, size, size);
-        }
     }
     
     darkenColor(hex, amount) {
@@ -85,21 +70,6 @@ class Food extends CellState {
         const adjustedColor = this.darkenColor(color, darkenAmount);
         ctx.fillStyle = adjustedColor;
         ctx.fillRect(cell.x, cell.y, size, size);
-        
-        if (Hyperparams.showPheromones && (cell.redPheromone > 0 || cell.greenPheromone > 0 || cell.bluePheromone > 0)) {
-            const r = Math.min(255, Math.floor(cell.redPheromone > 0 ? 255 : 0));
-            const g = Math.min(255, Math.floor(cell.greenPheromone > 0 ? 255 : 0));
-            const b = Math.min(255, Math.floor(cell.bluePheromone > 0 ? 255 : 0));
-            
-            const maxFrames = 30;
-            const remainingFrames = Math.max(cell.redPheromone, cell.greenPheromone, cell.bluePheromone);
-            const fadeRatio = remainingFrames / maxFrames;
-            
-            const opacity = fadeRatio * 0.275;
-            
-            ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${opacity})`;
-            ctx.fillRect(cell.x, cell.y, size, size);
-        }
     }
 }
 
@@ -135,21 +105,6 @@ class Plant extends CellState {
         const adjustedColor = this.darkenColor(color, darkenAmount);
         ctx.fillStyle = adjustedColor;
         ctx.fillRect(cell.x, cell.y, size, size);
-        
-        if (Hyperparams.showPheromones && (cell.redPheromone > 0 || cell.greenPheromone > 0 || cell.bluePheromone > 0)) {
-            const r = Math.min(255, Math.floor(cell.redPheromone > 0 ? 255 : 0));
-            const g = Math.min(255, Math.floor(cell.greenPheromone > 0 ? 255 : 0));
-            const b = Math.min(255, Math.floor(cell.bluePheromone > 0 ? 255 : 0));
-            
-            const maxFrames = 30;
-            const remainingFrames = Math.max(cell.redPheromone, cell.greenPheromone, cell.bluePheromone);
-            const fadeRatio = remainingFrames / maxFrames;
-            
-            const opacity = fadeRatio * 0.275;
-            
-            ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${opacity})`;
-            ctx.fillRect(cell.x, cell.y, size, size);
-        }
     }
 }
 
@@ -159,48 +114,32 @@ class Meat extends CellState {
     }
     
     render(ctx, cell, size) {
-        const rotTime = cell.rotTime || 0;
-        const maxRotTime = 5000;
-        
-        let colorFactor = Math.min(rotTime / maxRotTime, 1);
-        
-        const r = Math.max(0, Math.floor(209 - (colorFactor * 85)));
-        const g = Math.max(0, Math.floor(85 - (colorFactor * 25)));
-        const b = Math.max(0, Math.floor(99 - (colorFactor * 35)));
-        
-        const baseColor = `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
-        
         const depth = Math.min(cell.depth || 1, 3);
+        let color;
         let noiseAmount;
         switch (depth) {
-            case 1: noiseAmount = 0.2; break;
-            case 2: noiseAmount = 0.15; break;
-            case 3: noiseAmount = 0.1; break;
-            default: noiseAmount = 0.2;
+            case 1: 
+                color = this.color; 
+                noiseAmount = 0.2;
+                break;
+            case 2: 
+                color = this.darkenColor(this.color, -0.15); 
+                noiseAmount = 0.15;
+                break;
+            case 3: 
+                color = this.darkenColor(this.color, -0.3); 
+                noiseAmount = 0.1;
+                break;
+            default: 
+                color = this.color;
+                noiseAmount = 0.2;
         }
-        
         const randomSeed = (cell.col * 1000 + cell.row) % 10000;
         Math.seedrandom(randomSeed);
         const darkenAmount = (Math.random() - 0.5) * noiseAmount;
-        const adjustedColor = this.darkenColor(baseColor, darkenAmount);
-        
+        const adjustedColor = this.darkenColor(color, darkenAmount);
         ctx.fillStyle = adjustedColor;
         ctx.fillRect(cell.x, cell.y, size, size);
-        
-        if (Hyperparams.showPheromones && (cell.redPheromone > 0 || cell.greenPheromone > 0 || cell.bluePheromone > 0)) {
-            const r = Math.min(255, Math.floor(cell.redPheromone > 0 ? 255 : 0));
-            const g = Math.min(255, Math.floor(cell.greenPheromone > 0 ? 255 : 0));
-            const b = Math.min(255, Math.floor(cell.bluePheromone > 0 ? 255 : 0));
-            
-            const maxFrames = 30;
-            const remainingFrames = Math.max(cell.redPheromone, cell.greenPheromone, cell.bluePheromone);
-            const fadeRatio = remainingFrames / maxFrames;
-            
-            const opacity = fadeRatio * 0.275;
-            
-            ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${opacity})`;
-            ctx.fillRect(cell.x, cell.y, size, size);
-        }
     }
 }
 
@@ -219,21 +158,6 @@ class Rot extends CellState {
         
         ctx.fillStyle = adjustedColor;
         ctx.fillRect(cell.x, cell.y, size, size);
-        
-        if (Hyperparams.showPheromones && (cell.redPheromone > 0 || cell.greenPheromone > 0 || cell.bluePheromone > 0)) {
-            const r = Math.min(255, Math.floor(cell.redPheromone > 0 ? 255 : 0));
-            const g = Math.min(255, Math.floor(cell.greenPheromone > 0 ? 255 : 0));
-            const b = Math.min(255, Math.floor(cell.bluePheromone > 0 ? 255 : 0));
-            
-            const maxFrames = 30;
-            const remainingFrames = Math.max(cell.redPheromone, cell.greenPheromone, cell.bluePheromone);
-            const fadeRatio = remainingFrames / maxFrames;
-            
-            const opacity = fadeRatio * 0.275;
-            
-            ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${opacity})`;
-            ctx.fillRect(cell.x, cell.y, size, size);
-        }
     }
 }
 
@@ -252,21 +176,6 @@ class Wall extends CellState {
         
         ctx.fillStyle = adjustedColor;
         ctx.fillRect(cell.x, cell.y, size, size);
-        
-        if (Hyperparams.showPheromones && (cell.redPheromone > 0 || cell.greenPheromone > 0 || cell.bluePheromone > 0)) {
-            const r = Math.min(255, Math.floor(cell.redPheromone > 0 ? 255 : 0));
-            const g = Math.min(255, Math.floor(cell.greenPheromone > 0 ? 255 : 0));
-            const b = Math.min(255, Math.floor(cell.bluePheromone > 0 ? 255 : 0));
-            
-            const maxFrames = 30;
-            const remainingFrames = Math.max(cell.redPheromone, cell.greenPheromone, cell.bluePheromone);
-            const fadeRatio = remainingFrames / maxFrames;
-            
-            const opacity = fadeRatio * 0.275;
-            
-            ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${opacity})`;
-            ctx.fillRect(cell.x, cell.y, size, size);
-        }
     }
 }
 
@@ -279,7 +188,6 @@ class CarnivoreMouth extends CellState {
         ctx.fillRect(cell.x, cell.y, size, size);
         if(size <= 1) return;
         
-        // Editor
         if (size >= 10) {
             ctx.fillStyle = "#8B0000"; 
             const dotSize = Math.max(3, Math.floor(size * 0.25));
@@ -290,7 +198,6 @@ class CarnivoreMouth extends CellState {
             ctx.fillRect(cell.x, cell.y + halfSize - (dotSize/2), dotSize, dotSize);
             ctx.fillRect(cell.x + size - dotSize, cell.y + halfSize - (dotSize/2), dotSize, dotSize);
         }
-        // Simulation
         else {
             ctx.fillStyle = "#8B0000"; 
             const slitWidth = Math.max(1, Math.floor(size * 0.1));
@@ -301,21 +208,6 @@ class CarnivoreMouth extends CellState {
             ctx.fillRect(cell.x + slitOffset, cell.y + size - slitWidth, slitWidth, slitWidth);
             ctx.fillRect(cell.x, cell.y + slitOffset, slitWidth, slitWidth);
             ctx.fillRect(cell.x + size - slitWidth, cell.y + slitOffset, slitWidth, slitWidth);
-        }
-        
-        if (Hyperparams.showPheromones && (cell.redPheromone > 0 || cell.greenPheromone > 0 || cell.bluePheromone > 0)) {
-            const r = Math.min(255, Math.floor(cell.redPheromone > 0 ? 255 : 0));
-            const g = Math.min(255, Math.floor(cell.greenPheromone > 0 ? 255 : 0));
-            const b = Math.min(255, Math.floor(cell.bluePheromone > 0 ? 255 : 0));
-            
-            const maxFrames = 30;
-            const remainingFrames = Math.max(cell.redPheromone, cell.greenPheromone, cell.bluePheromone);
-            const fadeRatio = remainingFrames / maxFrames;
-            
-            const opacity = fadeRatio * 0.275;
-            
-            ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${opacity})`;
-            ctx.fillRect(cell.x, cell.y, size, size);
         }
     }
 }
@@ -329,19 +221,16 @@ class HerbivoreMouth extends CellState {
         ctx.fillRect(cell.x, cell.y, size, size);
         if(size <= 1) return;
         
-        // Editor
         if (size >= 10) {
             ctx.fillStyle = "#006400"; 
             const dotSize = Math.max(3, Math.floor(size * 0.25));
             const halfSize = size / 2;
             
-            // Top side center
             ctx.fillRect(cell.x + halfSize - (dotSize/2), cell.y, dotSize, dotSize);
             ctx.fillRect(cell.x + halfSize - (dotSize/2), cell.y + size - dotSize, dotSize, dotSize);
             ctx.fillRect(cell.x, cell.y + halfSize - (dotSize/2), dotSize, dotSize);
             ctx.fillRect(cell.x + size - dotSize, cell.y + halfSize - (dotSize/2), dotSize, dotSize);
         }
-        // Simulation
         else {
             ctx.fillStyle = "#006400"; 
             const slitWidth = Math.max(1, Math.floor(size * 0.1));
@@ -352,21 +241,6 @@ class HerbivoreMouth extends CellState {
             ctx.fillRect(cell.x + slitOffset, cell.y + size - slitWidth, slitWidth, slitWidth);
             ctx.fillRect(cell.x, cell.y + slitOffset, slitWidth, slitWidth);
             ctx.fillRect(cell.x + size - slitWidth, cell.y + slitOffset, slitWidth, slitWidth);
-        }
-        
-        if (Hyperparams.showPheromones && (cell.redPheromone > 0 || cell.greenPheromone > 0 || cell.bluePheromone > 0)) {
-            const r = Math.min(255, Math.floor(cell.redPheromone > 0 ? 255 : 0));
-            const g = Math.min(255, Math.floor(cell.greenPheromone > 0 ? 255 : 0));
-            const b = Math.min(255, Math.floor(cell.bluePheromone > 0 ? 255 : 0));
-            
-            const maxFrames = 30;
-            const remainingFrames = Math.max(cell.redPheromone, cell.greenPheromone, cell.bluePheromone);
-            const fadeRatio = remainingFrames / maxFrames;
-            
-            const opacity = fadeRatio * 0.275;
-            
-            ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${opacity})`;
-            ctx.fillRect(cell.x, cell.y, size, size);
         }
     }
 }
@@ -419,21 +293,6 @@ class Storage extends CellState {
         const offset = (size - innerSize) / 2;
         ctx.fillStyle = innerColor;
         ctx.fillRect(cell.x + offset, cell.y + offset, innerSize, innerSize);
-        
-        if (Hyperparams.showPheromones && (cell.redPheromone > 0 || cell.greenPheromone > 0 || cell.bluePheromone > 0)) {
-            const r = Math.min(255, Math.floor(cell.redPheromone > 0 ? 255 : 0));
-            const g = Math.min(255, Math.floor(cell.greenPheromone > 0 ? 255 : 0));
-            const b = Math.min(255, Math.floor(cell.bluePheromone > 0 ? 255 : 0));
-            
-            const maxFrames = 30;
-            const remainingFrames = Math.max(cell.redPheromone, cell.greenPheromone, cell.bluePheromone);
-            const fadeRatio = remainingFrames / maxFrames;
-            
-            const opacity = fadeRatio * 0.275;
-            
-            ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${opacity})`;
-            ctx.fillRect(cell.x, cell.y, size, size);
-        }
     }
 }
 class Eye extends CellState {
@@ -448,7 +307,6 @@ class Eye extends CellState {
         
         const halfSize = size / 2;
         
-        // Editor
         if (size >= 10) {
             const slitWidth = Math.max(3, Math.floor(size * 0.25));
             const slitHeight = Math.max(3, Math.floor(size * 0.75));
@@ -464,7 +322,6 @@ class Eye extends CellState {
             ctx.fillRect(xOffset, yOffset, slitWidth, slitHeight);
             ctx.restore();
         }
-        // Simulation
         else {
             const slitWidth = Math.max(1, Math.floor(size * 0.25));
             const slitHeight = Math.max(1, Math.floor(size * 0.75));
@@ -480,21 +337,6 @@ class Eye extends CellState {
             ctx.fillRect(xOffset, yOffset, slitWidth, slitHeight);
             ctx.restore();
         }
-        
-        if (Hyperparams.showPheromones && (cell.redPheromone > 0 || cell.greenPheromone > 0 || cell.bluePheromone > 0)) {
-            const r = Math.min(255, Math.floor(cell.redPheromone > 0 ? 255 : 0));
-            const g = Math.min(255, Math.floor(cell.greenPheromone > 0 ? 255 : 0));
-            const b = Math.min(255, Math.floor(cell.bluePheromone > 0 ? 255 : 0));
-            
-            const maxFrames = 30;
-            const remainingFrames = Math.max(cell.redPheromone, cell.greenPheromone, cell.bluePheromone);
-            const fadeRatio = remainingFrames / maxFrames;
-            
-            const opacity = fadeRatio * 0.275;
-            
-            ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${opacity})`;
-            ctx.fillRect(cell.x, cell.y, size, size);
-        }
     }
 }
 class LeftRightMover extends CellState {
@@ -506,7 +348,6 @@ class LeftRightMover extends CellState {
         ctx.fillRect(cell.x, cell.y, size, size);
         if(size <= 1) return;
         
-        // Editor
         if (size >= 10) {
             ctx.fillStyle = "#305A80"; 
             const dotSize = Math.max(3, Math.floor(size * 0.25));
@@ -514,7 +355,6 @@ class LeftRightMover extends CellState {
             ctx.fillRect(cell.x, cell.y + (size/2) - (dotSize/2), dotSize, dotSize);
             ctx.fillRect(cell.x + size - dotSize, cell.y + (size/2) - (dotSize/2), dotSize, dotSize);
         }
-        // Simulation
         else {
             ctx.fillStyle = "#305A80"; 
             const slitWidth = Math.max(1, Math.floor(size * 0.1));
@@ -523,21 +363,6 @@ class LeftRightMover extends CellState {
             
             ctx.fillRect(cell.x, cell.y + slitOffset, slitWidth, slitWidth);
             ctx.fillRect(cell.x + size - slitWidth, cell.y + slitOffset, slitWidth, slitWidth);
-        }
-        
-        if (Hyperparams.showPheromones && (cell.redPheromone > 0 || cell.greenPheromone > 0 || cell.bluePheromone > 0)) {
-            const r = Math.min(255, Math.floor(cell.redPheromone > 0 ? 255 : 0));
-            const g = Math.min(255, Math.floor(cell.greenPheromone > 0 ? 255 : 0));
-            const b = Math.min(255, Math.floor(cell.bluePheromone > 0 ? 255 : 0));
-            
-            const maxFrames = 30;
-            const remainingFrames = Math.max(cell.redPheromone, cell.greenPheromone, cell.bluePheromone);
-            const fadeRatio = remainingFrames / maxFrames;
-            
-            const opacity = fadeRatio * 0.275;
-            
-            ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${opacity})`;
-            ctx.fillRect(cell.x, cell.y, size, size);
         }
     }
 }
@@ -550,7 +375,6 @@ class UpDownMover extends CellState {
         ctx.fillRect(cell.x, cell.y, size, size);
         if(size <= 1) return;
         
-        // Editor
         if (size >= 10) {
             ctx.fillStyle = "#4080B0"; 
             const dotSize = Math.max(3, Math.floor(size * 0.25));
@@ -558,7 +382,6 @@ class UpDownMover extends CellState {
             ctx.fillRect(cell.x + (size/2) - (dotSize/2), cell.y, dotSize, dotSize);
             ctx.fillRect(cell.x + (size/2) - (dotSize/2), cell.y + size - dotSize, dotSize, dotSize);
         }
-        // Simulation
         else {
             ctx.fillStyle = "#4080B0"; 
             const slitWidth = Math.max(1, Math.floor(size * 0.1));
@@ -567,21 +390,6 @@ class UpDownMover extends CellState {
             
             ctx.fillRect(cell.x + slitOffset, cell.y, slitWidth, slitWidth);
             ctx.fillRect(cell.x + slitOffset, cell.y + size - slitWidth, slitWidth, slitWidth);
-        }
-        
-        if (Hyperparams.showPheromones && (cell.redPheromone > 0 || cell.greenPheromone > 0 || cell.bluePheromone > 0)) {
-            const r = Math.min(255, Math.floor(cell.redPheromone > 0 ? 255 : 0));
-            const g = Math.min(255, Math.floor(cell.greenPheromone > 0 ? 255 : 0));
-            const b = Math.min(255, Math.floor(cell.bluePheromone > 0 ? 255 : 0));
-            
-            const maxFrames = 30;
-            const remainingFrames = Math.max(cell.redPheromone, cell.greenPheromone, cell.bluePheromone);
-            const fadeRatio = remainingFrames / maxFrames;
-            
-            const opacity = fadeRatio * 0.275;
-            
-            ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${opacity})`;
-            ctx.fillRect(cell.x, cell.y, size, size);
         }
     }
 }
@@ -594,7 +402,6 @@ class RotationMover extends CellState {
         ctx.fillRect(cell.x, cell.y, size, size);
         if(size <= 1) return;
         
-        // Editor
         if (size >= 10) {
             ctx.fillStyle = "#305A80"; 
             const dotSize = Math.max(3, Math.floor(size * 0.25));
@@ -604,7 +411,6 @@ class RotationMover extends CellState {
             ctx.fillRect(cell.x, cell.y + size - dotSize, dotSize, dotSize);
             ctx.fillRect(cell.x + size - dotSize, cell.y + size - dotSize, dotSize, dotSize);
         }
-        // Simulation
         else {
             ctx.fillStyle = "#305A80"; 
             const slitWidth = Math.max(1, Math.floor(size * 0.1));
@@ -613,21 +419,6 @@ class RotationMover extends CellState {
             ctx.fillRect(cell.x + size - slitWidth, cell.y, slitWidth, slitWidth);
             ctx.fillRect(cell.x, cell.y + size - slitWidth, slitWidth, slitWidth);
             ctx.fillRect(cell.x + size - slitWidth, cell.y + size - slitWidth, slitWidth, slitWidth);
-        }
-        
-        if (Hyperparams.showPheromones && (cell.redPheromone > 0 || cell.greenPheromone > 0 || cell.bluePheromone > 0)) {
-            const r = Math.min(255, Math.floor(cell.redPheromone > 0 ? 255 : 0));
-            const g = Math.min(255, Math.floor(cell.greenPheromone > 0 ? 255 : 0));
-            const b = Math.min(255, Math.floor(cell.bluePheromone > 0 ? 255 : 0));
-            
-            const maxFrames = 30;
-            const remainingFrames = Math.max(cell.redPheromone, cell.greenPheromone, cell.bluePheromone);
-            const fadeRatio = remainingFrames / maxFrames;
-            
-            const opacity = fadeRatio * 0.275;
-            
-            ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${opacity})`;
-            ctx.fillRect(cell.x, cell.y, size, size);
         }
     }
 }

@@ -67,7 +67,7 @@ class WorldEnvironment extends Environment{
             this.allCells = [];
             for (var col of this.grid_map.grid) {
                 for (var cell of col) {
-                    if (cell.state === CellStates.meat || cell.state === CellStates.rot) {
+                    if (cell.state === CellStates.meat || cell.state === CellStates.plant || cell.state === CellStates.rot) {
                         this.allCells.push(cell);
                     }
                 }
@@ -82,19 +82,36 @@ class WorldEnvironment extends Environment{
         
         for (let i = startIdx; i < endIdx; i++) {
             const cell = this.allCells[i];
-            
+
             if (cell.state === CellStates.meat) {
                 if (cell.rotTime === undefined) {
                     cell.rotTime = 0;
                 } else {
-                    cell.rotTime += 10; 
+                    cell.rotTime += 10 * Hyperparams.meatRotSpeed;
                 }
                 
                 if (cell.rotTime >= 5000) {
                     this.cellsToProcess.push({
                         col: cell.col,
                         row: cell.row,
-                        action: 1
+                        action: 1  // convert to rot
+                    });
+                } else {
+                    this.renderer.addToRender(cell);
+                }
+            }
+            else if (cell.state === CellStates.plant) {
+                if (cell.rotTime === undefined) {
+                    cell.rotTime = 0;
+                } else {
+                    cell.rotTime += 7.5 * Hyperparams.plantWiltSpeed;
+                }
+                
+                if (cell.rotTime >= 5000) {
+                    this.cellsToProcess.push({
+                        col: cell.col,
+                        row: cell.row,
+                        action: 3  // attempt removal
                     });
                 } else {
                     this.renderer.addToRender(cell);
@@ -104,7 +121,7 @@ class WorldEnvironment extends Environment{
                 if (cell.rotAge === undefined) {
                     cell.rotAge = 0;
                 } else {
-                    cell.rotAge += 10; 
+                    cell.rotAge += 10 * Hyperparams.meatRotSpeed;
                 }
                 
                 if (cell.rotAge >= 250) {
@@ -119,13 +136,13 @@ class WorldEnvironment extends Environment{
                             this.cellsToProcess.push({
                                 col: neighborCol,
                                 row: neighborRow,
-                                action: 2
+                                action: 2  // convert to plant
                             });
                         } else if (Math.random() < 0.065) {
                             this.cellsToProcess.push({
                                 col: cell.col,
                                 row: cell.row,
-                                action: 2
+                                action: 2  // convert to plant
                             });
                         }
                     }
@@ -135,7 +152,7 @@ class WorldEnvironment extends Environment{
                     this.cellsToProcess.push({
                         col: cell.col,
                         row: cell.row,
-                        action: 3
+                        action: 3  // attempt removal
                     });
                 } else {
                     this.renderer.addToRender(cell);
@@ -187,6 +204,14 @@ class WorldEnvironment extends Environment{
     updatePheromones() {
         if (!Hyperparams.showPheromones) return;
         
+        const now = Date.now();
+        if (!this._lastPheromoneUpdate) {
+            this._lastPheromoneUpdate = now;
+        } else if (now - this._lastPheromoneUpdate < 50) {
+            return;
+        }
+        this._lastPheromoneUpdate = now;
+        
         for (let col of this.grid_map.grid) {
             for (let cell of col) {
                 if (cell.redPheromone > 0) {
@@ -204,27 +229,47 @@ class WorldEnvironment extends Environment{
             }
         }
         
-        for (let org of this.organisms) {
+        const batchSize = Math.min(10, this.organisms.length);
+        for (let i = 0; i < batchSize; i++) {
+            const orgIndex = Math.floor(Math.random() * this.organisms.length);
+            const org = this.organisms[orgIndex];
+            
             for (let bodyCell of org.anatomy.cells) {
                 const realCell = org.getRealCell(bodyCell);
                 if (!realCell) continue;
                 
-                const neighbors = this.getNeighborCells(realCell.col, realCell.row);
-                
                 if (bodyCell.state === CellStates.killer) {
-                    for (let neighbor of neighbors) {
-                        neighbor.redPheromone = 25
-                        this.renderer.addToRender(neighbor);
+                    for (let dx = -1; dx <= 1; dx++) {
+                        for (let dy = -1; dy <= 1; dy++) {
+                            if (dx === 0 && dy === 0) continue;
+                            const neighborCell = this.grid_map.cellAt(realCell.col + dx, realCell.row + dy);
+                            if (neighborCell) {
+                                neighborCell.redPheromone = 30;
+                                this.renderer.addToRender(neighborCell);
+                            }
+                        }
                     }
                 } else if (bodyCell.state === CellStates.producer) {
-                    for (let neighbor of neighbors) {
-                        neighbor.greenPheromone = 25
-                        this.renderer.addToRender(neighbor);
+                    for (let dx = -1; dx <= 1; dx++) {
+                        for (let dy = -1; dy <= 1; dy++) {
+                            if (dx === 0 && dy === 0) continue;
+                            const neighborCell = this.grid_map.cellAt(realCell.col + dx, realCell.row + dy);
+                            if (neighborCell) {
+                                neighborCell.greenPheromone = 30;
+                                this.renderer.addToRender(neighborCell);
+                            }
+                        }
                     }
                 } else if (bodyCell.state === CellStates.armor) {
-                    for (let neighbor of neighbors) {
-                        neighbor.bluePheromone = 25
-                        this.renderer.addToRender(neighbor);
+                    for (let dx = -1; dx <= 1; dx++) {
+                        for (let dy = -1; dy <= 1; dy++) {
+                            if (dx === 0 && dy === 0) continue;
+                            const neighborCell = this.grid_map.cellAt(realCell.col + dx, realCell.row + dy);
+                            if (neighborCell) {
+                                neighborCell.bluePheromone = 30;
+                                this.renderer.addToRender(neighborCell);
+                            }
+                        }
                     }
                 }
             }
